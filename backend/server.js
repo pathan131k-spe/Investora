@@ -43,17 +43,140 @@ async function writeDB(data) {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "development-only-change-this-secret",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000
+
+const crypto = require("crypto");
+
+const SESSION_COOKIE = "investora_session";
+const SESSION_SECRET =
+  process.env.SESSION_SECRET ||
+  process.env.SUPABASE_SECRET_KEY ||
+  "change-this-secret";
+
+function signSession(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+
+  const signature = crypto
+    .createHmac("sha256", SESSION_SECRET)
+    .update(body)
+    .digest("base64url");
+
+  return body + "." + signature;
+}
+
+function verifySession(value) {
+  try {
+    if (!value) return null;
+
+    const parts = value.split(".");
+    if (parts.length !== 2) return null;
+
+    const [body, signature] = parts;
+
+    const expected = crypto
+      .createHmac("sha256", SESSION_SECRET)
+      .update(body)
+      .digest("base64url");
+
+    const a = Buffer.from(signature);
+    const b = Buffer.from(expected);
+
+    if (a.length !== b.length) return null;
+
+    if (!crypto.timingSafeEqual(a, b)) return null;
+
+    const payload = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8")
+    );
+
+    if (!payload || !payload.userId) return null;
+
+    return payload;
+  } catch {
+    return null;
   }
-}));
+}
+
+function getCookie(req, name) {
+  const header = req.headers.cookie || "";
+
+  const parts = header.split(";");
+
+  for (const part of parts) {
+    const item = part.trim();
+
+    if (item.startsWith(name + "=")) {
+      return decodeURIComponent(item.substring(name.length + 1));
+    }
+  }
+
+  return null;
+}
+
+function appendSetCookie(res, cookie) {
+  const existing = res.getHeader("Set-Cookie");
+
+  if (!existing) {
+    res.setHeader("Set-Cookie", [cookie]);
+  } else if (Array.isArray(existing)) {
+    res.setHeader("Set-Cookie", existing.concat(cookie));
+  } else {
+    res.setHeader("Set-Cookie", [existing, cookie]);
+  }
+}
+
+function createSessionCookie(session) {
+  const value = signSession({
+    userId: session.userId,
+    role: session.role || "user"
+  });
+
+  return [
+    `${SESSION_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Secure",
+    "Max-Age=86400"
+  ].join("; ");
+}
+
+function clearSessionCookie() {
+  return [
+    `${SESSION_COOKIE}=`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    "Secure",
+    "Max-Age=0"
+  ].join("; ");
+}
+
+app.use((req, res, next) => {
+  const saved = verifySession(getCookie(req, SESSION_COOKIE));
+
+  let destroyed = false;
+
+  req.session = saved || {};
+
+  req.session.destroy = () => {
+    destroyed = true;
+    req.session = {};
+    appendSetCookie(res, clearSessionCookie());
+  };
+
+  const originalEnd = res.end;
+
+  res.end = function (...args) {
+    if (!destroyed && req.session && req.session.userId) {
+      appendSetCookie(res, createSessionCookie(req.session));
+    }
+
+    return originalEnd.apply(this, args);
+  };
+
+  next();
+});
+
 
 app.use(express.static(path.join(__dirname, "../frontend")));
 
