@@ -60,6 +60,23 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
+
+
+// ===== SUPABASE DB BOOTSTRAP =====
+app.use(async (req, res, next) => {
+  try {
+    await initDB();
+    next();
+  } catch (err) {
+    console.error("SUPABASE INIT ERROR:", err.message);
+    return res.status(503).json({
+      success: false,
+      message: "Database temporarily unavailable"
+    });
+  }
+});
+// ===== END SUPABASE DB BOOTSTRAP =====
+
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password, referralCode } = req.body;
