@@ -23,7 +23,7 @@ const session = require("express-session");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DB_FILE = path.join(__dirname, "database.json");
+const DB_FILE = process.env.VERCEL ? "/tmp/investora-database.json" : path.join(__dirname, "database.json");
 
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({ users: [] }, null, 2));
