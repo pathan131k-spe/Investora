@@ -15,11 +15,12 @@ function logActivity(userId, action, details = "") {
 
   writeDB(db);
 }const express = require("express");
+const supabase = require("./supabase");
 const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
-const { loadDB, saveDB } = require("./db-supabase");
+const { initDB, getDB, saveDB } = require("./db-supabase");
 
 
 const app = express();
@@ -63,23 +64,9 @@ app.get("/", (req, res) => {
 
 
 // ===== SUPABASE DB BOOTSTRAP =====
-app.use(async (req, res, next) => {
-  try {
-    await initDB();
-    next();
-  } catch (err) {
-    console.error("SUPABASE INIT ERROR:", err.message);
-    return res.status(503).json({
-      success: false,
-      message: "Database temporarily unavailable"
-    });
-  }
-});
-// ===== END SUPABASE DB BOOTSTRAP =====
-
 app.post("/api/register", async (req, res) => {
   try {
-    const { name, email, password, referralCode } = req.body;
+    const { name, email, password, referralCode } = req.body || {};
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -88,99 +75,95 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    if (password.length < 8) {
+    const cleanName = String(name).trim();
+    const cleanEmail = String(email).trim().toLowerCase();
+
+    if (!cleanName || !cleanEmail || String(password).length < 6) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters"
+        message: "Please enter valid registration details"
       });
     }
 
-    const db = readDB();
+    const { data: existing, error: existingError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", cleanEmail)
+      .maybeSingle();
 
-    if (!db.users) db.users = [];
-
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name.trim();
-
-    const existing = db.users.find(
-      u => String(u.email).toLowerCase() === cleanEmail
-    );
+    if (existingError) {
+      console.error("REGISTER CHECK ERROR:", existingError.message);
+      return res.status(503).json({
+        success: false,
+        message: "Database temporarily unavailable"
+      });
+    }
 
     if (existing) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "Email already registered"
       });
     }
 
-    // Optional referral code validation
-    let referredBy = null;
+    const passwordHash = await bcrypt.hash(String(password), 10);
 
-    if (referralCode && referralCode.trim()) {
-      const cleanReferralCode = referralCode.trim().toUpperCase();
+    let generatedReferralCode = "";
+    let referralUnique = false;
 
-      const referrer = db.users.find(
-        u => u.referralCode === cleanReferralCode
-      );
+    while (!referralUnique) {
+      generatedReferralCode =
+        "REF-" + Math.random().toString(36).substring(2, 10).toUpperCase();
 
-      if (!referrer) {
-        return res.status(400).json({
+      const { data: refCheck, error: refError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("referral_code", generatedReferralCode)
+        .maybeSingle();
+
+      if (refError) {
+        console.error("REFERRAL CHECK ERROR:", refError.message);
+        return res.status(503).json({
           success: false,
-          message: "Invalid referral code"
+          message: "Database temporarily unavailable"
         });
       }
 
-      referredBy = referrer.referralCode;
+      referralUnique = !refCheck;
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const { data: newUser, error: insertError } = await supabase
+      .from("users")
+      .insert({
+        id: Date.now().toString(),
+        name: cleanName,
+        email: cleanEmail,
+        password_hash: passwordHash,
+        role: "user",
+        referral_code: generatedReferralCode,
+        referred_by: referralCode || null,
+        created_at: new Date().toISOString()
+      })
+      .select("id,name,email,role,referral_code,created_at")
+      .single();
 
-    // Every new user gets a unique referral code
-    let newReferralCode;
+    if (insertError) {
+      console.error("REGISTER INSERT ERROR:", insertError.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to create account"
+      });
+    }
 
-    do {
-      newReferralCode =
-        "REF-" +
-        require("crypto")
-          .randomBytes(4)
-          .toString("hex")
-          .toUpperCase();
-    } while (
-      db.users.some(u => u.referralCode === newReferralCode)
-    );
-
-    const user = {
-      id: Date.now().toString(),
-      name: cleanName,
-      email: cleanEmail,
-      passwordHash,
-      role: "user",
-      referralCode: newReferralCode,
-      referredBy: referredBy,
-      createdAt: new Date().toISOString()
-    };
-
-    db.users.push(user);
-    writeDB(db);
-
-    req.session.userId = user.id;
-
-    logActivity(
-      user.id,
-      "REGISTER",
-      referredBy
-        ? "New account registered with referral"
-        : "New account registered"
-    );
+    req.session.userId = newUser.id;
+    req.session.role = newUser.role;
 
     res.json({
       success: true,
       message: "Account created successfully"
     });
-
   } catch (error) {
-    console.error(error);
-
+    console.error("REGISTER ERROR:", error);
     res.status(500).json({
       success: false,
       message: "Server error"
@@ -190,7 +173,7 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({
@@ -199,13 +182,21 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    const db = readDB() || {};
+    const cleanEmail = String(email).trim().toLowerCase();
 
-    const users = Array.isArray(db.users) ? db.users : [];
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", cleanEmail)
+      .maybeSingle();
 
-    const user = users.find(
-      user => user.email === email.toLowerCase()
-    );
+    if (userError) {
+      console.error("LOGIN DB ERROR:", userError.message);
+      return res.status(503).json({
+        success: false,
+        message: "Database temporarily unavailable"
+      });
+    }
 
     if (!user) {
       return res.status(401).json({
@@ -214,12 +205,12 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    const passwordOK = await bcrypt.compare(
-      password,
-      user.passwordHash
+    const passwordOk = await bcrypt.compare(
+      String(password),
+      user.password_hash
     );
 
-    if (!passwordOK) {
+    if (!passwordOk) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password"
@@ -227,21 +218,14 @@ app.post("/api/login", async (req, res) => {
     }
 
     req.session.userId = user.id;
-
-    logActivity(
-      user.id,
-      "LOGIN",
-      "User logged in"
-    );
+    req.session.role = user.role || "user";
 
     res.json({
       success: true,
       message: "Login successful"
     });
-
   } catch (error) {
-    console.error(error);
-
+    console.error("LOGIN ERROR:", error);
     res.status(500).json({
       success: false,
       message: "Server error"
@@ -249,29 +233,42 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.get("/api/me", (req, res) => {
-  if (!req.session.userId) {
-    return res.json({ loggedIn: false });
-  }
-
-  const db = readDB();
-
-  const user = db.users.find(
-    user => user.id === req.session.userId
-  );
-
-  if (!user) {
-    return res.json({ loggedIn: false });
-  }
-
-  res.json({
-    loggedIn: true,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email
+app.get("/api/me", async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.json({ loggedIn: false });
     }
-  });
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id,name,email,role,referral_code,referred_by,created_at")
+      .eq("id", req.session.userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("ME DB ERROR:", error.message);
+      return res.status(503).json({
+        loggedIn: false,
+        message: "Database temporarily unavailable"
+      });
+    }
+
+    if (!user) {
+      req.session.destroy(() => {});
+      return res.json({ loggedIn: false });
+    }
+
+    res.json({
+      loggedIn: true,
+      user
+    });
+  } catch (error) {
+    console.error("ME ERROR:", error);
+    res.status(500).json({
+      loggedIn: false,
+      message: "Server error"
+    });
+  }
 });
 
 app.post("/api/logout", (req, res) => {
