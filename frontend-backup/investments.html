@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Investment Plans</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:35px 20px;
+  border-radius:0 0 30px 30px;
+}
+
+.header h1{
+  margin:0 0 8px;
+  font-size:30px;
+}
+
+.header p{
+  margin:0;
+  font-size:16px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:16px;
+  border-radius:15px;
+  margin-bottom:20px;
+  line-height:1.5;
+}
+
+.card{
+  background:white;
+  padding:22px;
+  margin:16px 0;
+  border-radius:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.07);
+}
+
+.card h2{
+  margin:0 0 10px;
+}
+
+.amount{
+  font-size:28px;
+  font-weight:bold;
+  color:#2563eb;
+  margin:14px 0;
+}
+
+.active{
+  color:#16a34a;
+  font-weight:bold;
+}
+
+.inactive{
+  color:#dc2626;
+  font-weight:bold;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+  margin-top:12px;
+}
+
+button:disabled{
+  background:#94a3b8;
+}
+
+.message{
+  text-align:center;
+  color:#64748b;
+  padding:30px 10px;
+}
+
+#notice{
+  display:none;
+  background:#dcfce7;
+  color:#166534;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  font-weight:bold;
+}
+</style>
+<script src="/auth-check.js"></script>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>📊 Investment Plans</h1>
+  <p>Choose a demo investment plan</p>
+</div>
+
+<div class="container">
+
+  <div class="demo">
+    ⚠️ <b>Demo Mode</b><br>
+    No real money or real investment returns are involved.
+  </div>
+
+  <div id="notice"></div>
+
+  <div id="plans">
+    <div class="message">Loading plans...</div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadPlans(){
+
+  const container = document.getElementById("plans");
+
+  try{
+
+    const response = await fetch("/api/plans");
+    const data = await response.json();
+
+    if(!data.success){
+
+      container.innerHTML =
+        '<div class="message">Unable to load plans.</div>';
+
+      return;
+    }
+
+    const plans = data.plans || [];
+    const activePlans = plans.filter(plan => plan.active);
+
+    if(activePlans.length === 0){
+
+      container.innerHTML =
+        '<div class="message">No active demo plans available.</div>';
+
+      return;
+    }
+
+    container.innerHTML = activePlans.map(plan => `
+
+      <div class="card">
+
+        <h2>📈 ${escapeHtml(plan.name)}</h2>
+
+        <div class="amount">
+          Rs. ${Number(plan.amount || 0).toLocaleString()}
+        </div>
+
+        <div class="active">
+          ✓ Active
+        </div>
+
+        <p style="color:#64748b;">
+          Demo investment plan
+        </p>
+
+        <button onclick="selectPlan('${escapeJs(plan.id)}')">
+          Select Plan
+        </button>
+
+      </div>
+
+    `).join("");
+
+  }catch(error){
+
+    console.log("Plans error:",error);
+
+    container.innerHTML =
+      '<div class="message">Server connection error.</div>';
+  }
+}
+
+
+async function selectPlan(id){
+
+  try{
+
+    const response = await fetch("/api/plans");
+    const data = await response.json();
+
+    if(!data.success){
+
+      alert("Unable to load plans.");
+      return;
+    }
+
+    const plan = data.plans.find(
+      p => p.id === id && p.active
+    );
+
+    if(!plan){
+
+      alert("This plan is no longer active.");
+      loadPlans();
+      return;
+    }
+
+    localStorage.setItem(
+      "selectedPlan",
+      JSON.stringify({
+        id:plan.id,
+        name:plan.name,
+        amount:Number(plan.amount),
+        selectedAt:new Date().toISOString()
+      })
+    );
+
+    const notice = document.getElementById("notice");
+
+    notice.style.display = "block";
+
+    notice.textContent =
+      "✅ " + plan.name + " selected. Opening dashboard...";
+
+    setTimeout(() => {
+
+      window.location.href = "/dashboard.html";
+
+    },700);
+
+  }catch(error){
+
+    alert("Server connection error.");
+  }
+}
+
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function escapeJs(text){
+
+  return String(text)
+    .replace(/\\/g,"\\\\")
+    .replace(/'/g,"\\'");
+}
+
+
+loadPlans();
+
+</script>
+
+</body>
+</html>

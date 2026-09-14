@@ -1,0 +1,5 @@
+node_modules/
+backend/database.json
+backend/server.log
+*.backup*
+.env

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f6fb;
+}
+.header{
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  color:white;
+  padding:28px 20px;
+}
+.header h1{margin:0;font-size:28px}
+.container{max-width:600px;margin:25px auto;padding:0 18px}
+.card{
+  background:white;
+  padding:20px;
+  margin-bottom:15px;
+  border-radius:16px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+.amount{
+  font-size:22px;
+  font-weight:bold;
+  color:#2563eb;
+}
+.status{
+  font-weight:bold;
+}
+button{
+  border:0;
+  padding:12px 16px;
+  border-radius:9px;
+  color:white;
+  font-weight:bold;
+  margin:5px 5px 0 0;
+}
+.approve{background:#16a34a}
+.reject{background:#dc2626}
+</style>
+</head>
+
+<body>
+
+<div id="adminStats" style="
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin:20px 0;
+">
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">👥 Total Users</div>
+    <div id="statUsers" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">💰 Pending Deposits</div>
+    <div id="statPending" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">✅ Approved Deposits</div>
+    <div id="statApproved" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">📊 Active Investments</div>
+    <div id="statInvestments" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);grid-column:1/-1;">
+    <div style="font-size:14px;color:#64748b;">📝 Recent Activities</div>
+    <div id="statActivity" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+</div>
+
+<script>
+async function loadAdminStats() {
+  try {
+    const [usersRes, depositsRes, activityRes] = await Promise.all([
+      fetch("/api/admin/users"),
+      fetch("/api/admin/deposits"),
+      fetch("/api/admin/activity")
+    ]);
+
+    const usersData = await usersRes.json();
+    const depositsData = await depositsRes.json();
+    const activityData = await activityRes.json();
+
+    const users = usersData.users || [];
+    const deposits = depositsData.deposits || [];
+    const logs = activityData.logs || [];
+
+    const pending = deposits.filter(
+      d => d.status === "pending"
+    ).length;
+
+    const approved = deposits.filter(
+      d => d.status === "approved"
+    ).length;
+
+    document.getElementById("statUsers").textContent =
+      users.length;
+
+    document.getElementById("statPending").textContent =
+      pending;
+
+    document.getElementById("statApproved").textContent =
+      approved;
+
+    document.getElementById("statActivity").textContent =
+      logs.length;
+
+    try {
+      const response = await fetch("/api/admin/investments");
+      const data = await response.json();
+
+      document.getElementById("statInvestments").textContent =
+        data.investments
+          ? data.investments.filter(i => i.status === "active").length
+          : "0";
+    } catch {
+      document.getElementById("statInvestments").textContent = "0";
+    }
+
+  } catch (error) {
+    console.log("Admin stats error:", error);
+  }
+}
+
+loadAdminStats();
+
+setInterval(loadAdminStats, 30000);
+</script>
+
+
+<div class="header">
+  <h1>🛡️ Admin Dashboard</h1>
+  <p>Demo Deposit Management</p>
+</div>
+
+<div class="container">
+  <h2>💳 Deposit Requests</h2>
+  <div id="message">Loading...</div>
+  <div id="deposits"></div>
+</div>
+
+<div class="card">
+  <h2>👥 Users Management</h2>
+  <div id="users">Loading users...</div>
+</div>
+<div class="card">
+  <h2>📊 Investment Plans Management</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Demo plans — real money/returns are not active.
+  </p>
+  <div id="plans">Loading plans...</div>
+</div>
+
+<script>
+
+async function loadDeposits(){
+
+  const message = document.getElementById("message");
+  const container = document.getElementById("deposits");
+
+  try{
+
+    const response = await fetch("/api/admin/deposits");
+    const data = await response.json();
+
+    if(!data.success){
+      message.innerHTML = data.message;
+      return;
+    }
+
+    message.innerHTML = "";
+
+    if(data.deposits.length === 0){
+      container.innerHTML = "<div class='card'>No deposits yet.</div>";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.deposits.slice().reverse().forEach(deposit => {
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="amount">
+          Rs. ${Number(deposit.amount).toLocaleString()}
+        </div>
+
+        <p>
+          Status:
+          <span class="status">${deposit.status}</span>
+        </p>
+
+        <p>User ID: ${deposit.userId}</p>
+        <p>Deposit ID: ${deposit.id}</p>
+
+        <button class="approve"
+          onclick="changeStatus('${deposit.id}','approved')">
+          ✓ Approve
+        </button>
+
+        <button class="reject"
+          onclick="changeStatus('${deposit.id}','rejected')">
+          ✕ Reject
+        </button>
+      `;
+
+      container.appendChild(card);
+    });
+
+  }catch(error){
+
+    message.innerHTML = "Server connection error";
+
+  }
+}
+
+
+async function changeStatus(id,status){
+
+  try{
+
+    const response = await fetch(
+      "/api/admin/deposits/" + id + "/status",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({status:status})
+      }
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Demo deposit status: " + status);
+      loadDeposits();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+loadDeposits();
+
+
+async function loadUsers(){
+
+  const container = document.getElementById("users");
+
+  try{
+
+    const response = await fetch("/api/admin/users");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    if(data.users.length === 0){
+      container.innerHTML = "<p>No users found.</p>";
+      return;
+    }
+
+    container.innerHTML = data.users.map(user => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong>${user.name}</strong>
+        <p style="margin:6px 0;">${user.email}</p>
+        <small>Role: <b>${user.role}</b></small>
+        <br><br>
+        <button onclick="changeRole('${user.id}','${user.role === "admin" ? "user" : "admin"}')"
+          style="background:#2563eb;color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+          Change to ${user.role === "admin" ? "User" : "Admin"}
+        </button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadUsers();
+
+
+async function changeRole(id, role){
+
+  try{
+
+    const response = await fetch("/api/admin/users/" + id + "/role", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({role:role})
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Role changed to " + role);
+      loadUsers();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+
+async function loadPlans(){
+
+  const container = document.getElementById("plans");
+
+  try{
+
+    const response = await fetch("/api/admin/plans");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    container.innerHTML = data.plans.map(plan => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong style="font-size:18px;">${plan.name}</strong>
+        <p style="margin:7px 0;color:#2563eb;font-weight:bold;">
+          Rs. ${Number(plan.amount).toLocaleString()}
+        </p>
+        <small>Status: <b>${plan.active ? "Active" : "Inactive"}</b></small>
+<br><br>
+<button onclick="togglePlan('${plan.id}')"
+style="background:${plan.active ? "#dc2626" : "#16a34a"};color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+${plan.active ? "Deactivate" : "Activate"}
+</button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadPlans();
+
+
+async function togglePlan(id){
+
+  try{
+
+    const response = await fetch("/api/admin/plans/" + id + "/status", {
+      method:"POST"
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      loadPlans();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+</script>
+
+
+<div class="card">
+  <h2>📝 Activity Log</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Recent user and admin activities
+  </p>
+  
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:15px 0;">
+  <input
+    id="activitySearch"
+    type="text"
+    placeholder="🔎 Search user or email..."
+    oninput="filterActivity()"
+    style="flex:1;min-width:180px;padding:12px;border:1px solid #cbd5e1;border-radius:10px;"
+  >
+
+  <select
+    id="activityFilter"
+    onchange="filterActivity()"
+    style="padding:12px;border:1px solid #cbd5e1;border-radius:10px;"
+  >
+    <option value="ALL">All Activities</option>
+    <option value="LOGIN">Login</option>
+    <option value="LOGOUT">Logout</option>
+    <option value="DEPOSIT">Deposits</option>
+    <option value="INVESTMENT">Investments</option>
+    <option value="ROLE">Role Changes</option>
+    <option value="PLAN">Plan Changes</option>
+  </select>
+
+  <button
+    onclick="loadActivity()"
+    style="padding:12px 18px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold;"
+  >
+    🔄 Refresh
+  </button>
+</div>
+<div id="activity">
+    Loading activity...
+  </div>
+</div>
+
+<script>
+async function loadActivity() {
+  const box = document.getElementById("activity");
+
+  try {
+    const response = await fetch("/api/admin/activity");
+    const data = await response.json();
+
+    if (!data.success) {
+      box.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    if (!data.logs || data.logs.length === 0) {
+      box.innerHTML = "<p>No activity yet.</p>";
+      return;
+    }
+
+    window.activityLogs = data.logs || [];
+    filterActivity();
+  }
+
+  function filterActivity() {
+    const box = document.getElementById("activity");
+    const search = (document.getElementById("activitySearch")?.value || "").toLowerCase();
+    const filter = document.getElementById("activityFilter")?.value || "ALL";
+
+    const logs = (window.activityLogs || []).filter(log => {
+      const text = (
+        (log.userName || "") + " " +
+        (log.userEmail || "") + " " +
+        (log.action || "") + " " +
+        (log.details || "")
+      ).toLowerCase();
+
+      const matchesSearch = !search || text.includes(search);
+
+      let matchesFilter = true;
+
+      if (filter !== "ALL") {
+        matchesFilter = (log.action || "").includes(filter);
+      }
+
+      return matchesSearch && matchesFilter;
+    });
+
+    if (logs.length === 0) {
+      box.innerHTML = "<p>No matching activity found.</p>";
+      return;
+    }
+
+    box.innerHTML = logs.map(log => `
+      <div style="
+        background:#f8fafc;
+        padding:15px;
+        margin:10px 0;
+        border-radius:12px;
+        border-left:4px solid #2563eb;
+      ">
+        <b>👤 ${escapeHtml(log.userName || "Unknown User")}</b>
+        <div style="color:#64748b;font-size:13px;margin-top:3px;">
+          ${escapeHtml(log.userEmail || "")}
+        </div>
+        <div style="margin-top:8px;">
+          <b>${escapeHtml(log.action)}</b>
+        </div>
+        <div style="color:#475569;margin-top:5px;">
+          ${escapeHtml(log.details || "")}
+        </div>
+        <small style="color:#64748b;">
+          ${new Date(log.createdAt).toLocaleString()}
+        </small>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    box.innerHTML = "<p>Server connection error</p>";
+  }
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+loadActivity();
+</script>
+
+</body>
+</html>

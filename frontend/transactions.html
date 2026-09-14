@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Investora — Invest • Grow • Earn</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:35px 20px;
+  border-radius:0 0 30px 30px;
+}
+
+.header h1{
+  margin:0 0 8px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:16px;
+  border-radius:15px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:white;
+  padding:18px;
+  margin:12px 0;
+  border-radius:18px;
+  box-shadow:0 4px 15px rgba(0,0,0,.07);
+}
+
+.amount{
+  font-size:23px;
+  font-weight:bold;
+  color:#2563eb;
+  margin-top:8px;
+}
+
+.status{
+  font-weight:bold;
+  margin-top:7px;
+}
+
+.date{
+  color:#64748b;
+  font-size:13px;
+  margin-top:8px;
+}
+
+.empty{
+  text-align:center;
+  color:#64748b;
+  padding:30px 10px;
+}
+</style>
+
+<style id="horizontal-layout">
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  overflow-x:hidden;
+}
+
+#userNavigation{
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  overflow-x:auto !important;
+  gap:10px !important;
+  padding:10px !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+#userNavigation a{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+.card{
+  flex:0 0 300px !important;
+}
+
+section{
+  max-width:100%;
+}
+
+@media(max-width:700px){
+  .card,
+  .dashboard-card,
+  .plan-card,
+  .stat-card{
+    flex:0 0 85vw;
+    max-width:85vw;
+  }
+
+  .cards,
+  .card-container,
+  .card-grid,
+  .plans,
+  .plans-container{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:14px !important;
+    padding:8px 4px 16px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cards > *,
+  .card-container > *,
+  .card-grid > *,
+  .plans > *,
+  .plans-container > *{
+    flex:0 0 85vw !important;
+  }
+}
+</style>
+
+
+<style id="transactions-final-design">
+body{
+  margin:0;
+  background:#f3f6fb;
+  font-family:Arial,Helvetica,sans-serif;
+  color:#172033;
+}
+.transactions-container{
+  max-width:1000px;
+  margin:auto;
+  padding:18px 12px 40px;
+}
+.transaction-item{
+  background:#fff;
+  border:1px solid #e5eaf2;
+  border-radius:18px;
+  padding:17px;
+  margin-bottom:12px;
+  box-shadow:0 6px 20px rgba(30,50,80,.07);
+}
+.transaction-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.transaction-title{
+  font-size:17px;
+  font-weight:700;
+}
+.transaction-amount{
+  font-size:19px;
+  font-weight:800;
+}
+.transaction-date{
+  margin-top:8px;
+  color:#718096;
+  font-size:13px;
+}
+.transaction-status{
+  display:inline-block;
+  margin-top:9px;
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+  background:#eef2f7;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h1>📜 Transactions</h1>
+  <p>Complete demo activity history</p>
+</div>
+
+<div class="container">
+
+  <div class="demo">
+    ⚠️ <b>Demo Mode</b> — No real money transactions are processed.
+  </div>
+
+  <div id="transactions">
+    Loading transactions...
+  </div>
+
+</div>
+
+<script>
+
+async function loadTransactions(){
+
+  const box = document.getElementById("transactions");
+
+  try{
+
+    const response = await fetch("/api/transactions");
+    const data = await response.json();
+
+    if(!data.success){
+
+      box.innerHTML =
+        '<div class="empty">' +
+        escapeHtml(data.message || "Please login first") +
+        '</div>';
+
+      return;
+    }
+
+    const transactions = data.transactions || [];
+
+    if(transactions.length === 0){
+
+      box.innerHTML =
+        '<div class="empty">No transactions yet.</div>';
+
+      return;
+    }
+
+    box.innerHTML = transactions.map(item => {
+
+      let icon = "💰";
+      let status = "⏳ Pending";
+      let color = "#d97706";
+
+      if(item.type === "investment"){
+        icon = "📊";
+      }
+
+      if(item.status === "approved"){
+        status = "✅ Approved";
+        color = "#16a34a";
+      }
+
+      if(item.status === "active"){
+        status = "✅ Active";
+        color = "#16a34a";
+      }
+
+      if(item.status === "rejected"){
+        status = "❌ Rejected";
+        color = "#dc2626";
+      }
+
+      return `
+        <div class="card">
+
+          <div>
+            <b>${icon} ${escapeHtml(item.title)}</b>
+          </div>
+
+          <div class="amount">
+            Rs. ${Number(item.amount || 0).toLocaleString()}
+          </div>
+
+          <div
+            class="status"
+            style="color:${color}"
+          >
+            ${status}
+          </div>
+
+          <div class="date">
+            🕐 ${new Date(item.createdAt).toLocaleString()}
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+  }catch(error){
+
+    console.log("Transactions error:", error);
+
+    box.innerHTML =
+      '<div class="empty">Server connection error.</div>';
+  }
+}
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+loadTransactions();
+
+</script>
+
+</body>
+</html>

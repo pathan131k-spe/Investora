@@ -1,0 +1,768 @@
+	<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Investment Dashboard</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#111827;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:25px 20px 30px;
+  border-radius:0 0 28px 28px;
+}
+
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+}
+
+.user-icon{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px;
+}
+
+.welcome{
+  margin-top:25px;
+}
+
+.welcome h1{
+  margin:0;
+  font-size:28px;
+}
+
+.welcome p{
+  margin:7px 0 0;
+  opacity:.85;
+}
+
+.container{
+  max-width:650px;
+  margin:-15px auto 30px;
+  padding:0 15px;
+}
+
+.balance-card{
+  background:white;
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.balance-label{
+  color:#64748b;
+  font-size:15px;
+}
+
+.balance{
+  font-size:36px;
+  font-weight:bold;
+  margin:8px 0;
+  color:#2563eb;
+}
+
+.balance-note{
+  color:#94a3b8;
+  font-size:13px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:15px;
+}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:20px;
+  box-shadow:0 5px 18px rgba(0,0,0,.06);
+}
+
+.icon{
+  font-size:24px;
+  margin-bottom:12px;
+}
+
+.card-title{
+  color:#64748b;
+  font-size:14px;
+}
+
+.card-value{
+  margin-top:7px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.active{
+  color:#16a34a;
+}
+
+.history{
+  margin-top:15px;
+}
+
+.history h3{
+  margin-top:0;
+}
+
+.empty{
+  padding:20px;
+  background:#f8fafc;
+  border-radius:12px;
+  color:#64748b;
+  text-align:center;
+}
+
+.account{
+  margin-top:15px;
+}
+
+.email{
+  color:#64748b;
+  margin-bottom:18px;
+  word-break:break-word;
+}
+
+.logout{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#ef4444;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+}
+
+.logout:active{
+  transform:scale(.98);
+}
+
+.footer{
+  text-align:center;
+  color:#94a3b8;
+  font-size:12px;
+  padding:5px 0 25px;
+}
+
+@media(max-width:380px){
+  .welcome h1{font-size:24px}
+  .balance{font-size:31px}
+}
+</style>
+<script src="/auth-check.js"></script>
+</head>
+
+<body>
+
+<div id="userNavigation" style="
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:white;
+  padding:10px;
+  margin:0;
+  box-shadow:0 3px 12px rgba(0,0,0,.10);
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  white-space:nowrap;
+">
+  <a href="/dashboard.html" style="padding:10px 13px;border-radius:10px;background:#2563eb;color:white;text-decoration:none;font-weight:bold;">🏠 Dashboard</a>
+  <a href="/investments.html" style="padding:10px 13px;border-radius:10px;background:#2563eb;color:white;text-decoration:none;font-weight:bold;">📊 Invest</a>
+  <a href="/deposit.html" style="padding:10px 13px;border-radius:10px;background:#2563eb;color:white;text-decoration:none;font-weight:bold;">💰 Deposit</a>
+  <a id="navAdmin" href="/admin.html" style="display:none;padding:10px 13px;border-radius:10px;background:#1e293b;color:white;text-decoration:none;font-weight:bold;">🛡️ Admin</a>
+</div>
+
+<script>
+async function setupUserNavigation() {
+  try {
+    const response = await fetch("/api/me");
+    const data = await response.json();
+
+    if (
+      data.loggedIn &&
+      data.user &&
+      data.user.role === "admin"
+    ) {
+      const admin = document.getElementById("navAdmin");
+      if (admin) admin.style.display = "block";
+    }
+  } catch (error) {
+    console.log("Navigation check error:", error);
+  }
+}
+
+setupUserNavigation();
+</script>
+
+
+<header class="header">
+
+  <div class="header-top">
+    <div class="logo">My Investment</div>
+    <div class="user-icon">👤</div>
+  </div>
+
+  <div class="welcome">
+    <h1>Welcome, <span id="userName">User</span></h1>
+    <p>Your investment dashboard</p>
+  </div>
+
+</header>
+
+<main class="container">
+
+  <section class="balance-card">
+    <div class="balance-label">Current Balance</div>
+    <div class="balance">Rs. 0</div>
+    <div class="balance-note">Demo account balance</div>
+  </section>
+
+  <section class="grid">
+
+    <div class="card">
+      <div class="icon">📊</div>
+      <div class="card-title">Investment</div>
+      <div class="card-value">Not Active</div>
+    </div>
+
+    <div class="card">
+      <div class="icon">💰</div>
+      <div class="card-title">Total Earnings</div>
+      <div class="card-value">Rs. 0</div>
+    </div>
+
+    <div class="card">
+      <div class="icon">📈</div>
+      <div class="card-title">Investment Status</div>
+      <div id="investmentStatus" class="card-value active">Checking...</div>
+    </div>
+
+    <div class="card">
+      <div class="icon">🧾</div>
+      <div class="card-title">Transactions</div>
+      <div class="card-value">0</div>
+    </div>
+
+  </section>
+
+  <section class="card history">
+    <h3>Investment History</h3>
+
+    <div class="empty">
+      No investment records yet.
+    </div>
+  </section>
+
+  <section class="card account">
+    <h3>My Account</h3>
+
+    <div class="email" id="userEmail">
+      Loading...
+    </div>
+
+    <button class="logout" onclick="logout()">
+      Logout
+    </button>
+  </section>
+
+  <div class="footer">
+    My Investment • Demo Dashboard
+  </div>
+
+</main>
+
+<script>
+
+async function loadUser(){
+
+  try{
+
+    const response = await fetch("/api/me");
+    const data = await response.json();
+
+    if(!data.loggedIn){
+      window.location.href="/";
+      return;
+    }
+
+    document.getElementById("userName").textContent =
+      data.user.name;
+
+    document.getElementById("userEmail").textContent =
+      data.user.email;
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+async function logout(){
+
+  try{
+
+    await fetch("/api/logout",{
+      method:"POST"
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+  window.location.href="/";
+
+}
+
+loadUser();
+
+</script>
+
+<a href="/investments.html" style="display:block;margin:20px;padding:16px;background:#2563eb;color:white;text-align:center;text-decoration:none;border-radius:12px;font-weight:bold;">📊 View Investment Plans</a>
+<script>
+const savedPlan = localStorage.getItem("selectedPlan");
+
+if (savedPlan) {
+  const plan = JSON.parse(savedPlan);
+
+  const card = document.createElement("div");
+  card.style.cssText = "background:white;margin:20px 0;padding:22px;border-radius:18px;box-shadow:0 4px 15px rgba(0,0,0,.08);";
+
+  card.innerHTML = `
+    <h2 style="margin-top:0;">📊 Selected Plan</h2>
+    <p style="font-size:20px;font-weight:bold;">${plan.name}</p>
+    <p style="font-size:18px;color:#2563eb;">${plan.amount}</p>
+    <p style="color:#16a34a;font-weight:bold;">✓ Selected</p>
+    <p style="color:#64748b;font-size:14px;">Demo Mode — no real money involved.</p>
+  `;
+
+  const container = document.querySelector(".container");
+  if (container) {
+    container.appendChild(card);
+  }
+}
+</script>
+
+
+<a href="/deposit.html" style="display:block;margin:15px 20px;padding:16px;background:#16a34a;color:white;text-align:center;text-decoration:none;border-radius:12px;font-weight:bold;">
+💳 Deposit (Demo)
+</a>
+
+
+<script>
+async function loadDeposits(){
+  try{
+    const response = await fetch("/api/deposits");
+    const data = await response.json();
+
+    if(!data.success) return;
+
+    const history = document.createElement("div");
+    history.style.cssText =
+      "background:white;margin:20px 0;padding:22px;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,.08);";
+
+    let html = "<h2>💳 Deposit History</h2>";
+
+    if(data.deposits.length === 0){
+      html += "<p>No deposits yet.</p>";
+    }else{
+      data.deposits.slice().reverse().forEach(d => {
+        html += `
+          <div style="padding:12px 0;border-bottom:1px solid #eee;">
+            <strong>Rs. ${Number(d.amount).toLocaleString()}</strong>
+            <span style="color:#d97706;margin-left:10px;">${d.status}</span>
+          </div>
+        `;
+      });
+    }
+
+    history.innerHTML = html;
+
+    const container = document.querySelector(".container");
+    if(container) container.appendChild(history);
+
+  }catch(error){
+    console.log(error);
+  }
+}
+
+loadDeposits();
+</script>
+
+
+<script>
+async function updateTransactionCount(){
+  try{
+    const response = await fetch("/api/deposits");
+    const data = await response.json();
+
+    if(!data.success) return;
+
+    const labels = document.querySelectorAll("*");
+
+    labels.forEach(label => {
+      if(label.children.length === 0 && label.textContent.trim() === "Transactions"){
+        const card = label.parentElement;
+        const numbers = card.querySelectorAll("*");
+
+        numbers.forEach(el => {
+          if(el.children.length === 0 && /^\d+$/.test(el.textContent.trim())){
+            el.textContent = data.deposits.length;
+          }
+        });
+      }
+    });
+
+  }catch(error){
+    console.log(error);
+  }
+}
+
+updateTransactionCount();
+</script>
+
+<script>
+async function loadWallet() {
+  try {
+    const response = await fetch("/api/wallet");
+    const data = await response.json();
+
+    if (data.success) {
+      const balance = document.querySelector(".balance");
+
+      if (balance) {
+        balance.textContent =
+          "Rs. " + Number(data.wallet.balance).toLocaleString();
+      }
+    }
+  } catch (error) {
+    console.log("Wallet error:", error);
+  }
+}
+
+loadWallet();
+</script><script>
+async function loadInvestment() {
+  try {
+    const response = await fetch("/api/investment");
+    const data = await response.json();
+
+    const box = document.querySelector(".container");
+
+    if (!box || !data.success) return;
+
+    if (data.investments.length > 0) {
+      const investment = data.investments[data.investments.length - 1];
+
+      box.insertAdjacentHTML("afterbegin", `
+        <div style="
+          background:white;
+          margin:20px 0;
+          padding:20px;
+          border-radius:18px;
+          box-shadow:0 5px 20px rgba(0,0,0,.08);
+        ">
+          <h2 style="margin-top:0;">📊 My Demo Investment</h2>
+          <p><b>Plan:</b> ${investment.planName}</p>
+          <p><b>Amount:</b> Rs. ${Number(investment.amount).toLocaleString()}</p>
+          <p style="color:#16a34a;font-weight:bold;">
+            ✓ ${investment.status === "active" ? "Active" : investment.status}
+          </p>
+        </div>
+      `);
+    }
+  } catch (error) {
+    console.log("Investment error:", error);
+  }
+}
+
+loadInvestment();
+</script>
+<script>
+async function updateInvestmentStatus() {
+    const box = document.getElementById("investmentStatus");
+    if (!box) return;
+
+    try {
+        const response = await fetch("/api/investment");
+        const data = await response.json();
+
+        if (data.success && data.investments && data.investments.length > 0) {
+            const investment = data.investments[data.investments.length - 1];
+
+            if (investment.status === "active") {
+                box.textContent = "Active";
+                box.style.color = "#16a34a";
+            } else {
+                box.textContent = investment.status || "Not Active";
+                box.style.color = "#dc2626";
+            }
+        } else {
+            box.textContent = "Not Active";
+            box.style.color = "#dc2626";
+        }
+    } catch (error) {
+        console.log("Investment status error:", error);
+        box.textContent = "Not Active";
+        box.style.color = "#dc2626";
+    }
+}
+
+updateInvestmentStatus();
+</script>
+
+
+<div id="adminPanelButton" style="display:none;margin:20px 0;">
+  <a href="/admin.html" style="
+    display:block;
+    text-align:center;
+    padding:15px;
+    border-radius:14px;
+    background:#1e293b;
+    color:white;
+    text-decoration:none;
+    font-size:17px;
+    font-weight:bold;
+  ">
+    🛡️ Open Admin Panel
+  </a>
+</div>
+
+<script>
+async function checkAdminAccess() {
+  try {
+    const response = await fetch("/api/me");
+    const data = await response.json();
+
+    if (
+      data.loggedIn &&
+      data.user &&
+      data.user.role === "admin"
+    ) {
+      document.getElementById("adminPanelButton").style.display = "block";
+    }
+  } catch (error) {
+    console.log("Admin access check error:", error);
+  }
+}
+
+checkAdminAccess();
+</script>
+
+
+<div id="dashboardSummary" style="
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin:20px 0;
+">
+  <div style="background:white;padding:18px;border-radius:18px;box-shadow:0 4px 15px rgba(0,0,0,.07);">
+    <div style="font-size:14px;color:#64748b;">💰 Total Deposited</div>
+    <div id="totalDeposited" style="font-size:22px;font-weight:bold;margin-top:8px;">Rs. 0</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:18px;box-shadow:0 4px 15px rgba(0,0,0,.07);">
+    <div style="font-size:14px;color:#64748b;">⏳ Pending</div>
+    <div id="pendingAmount" style="font-size:22px;font-weight:bold;margin-top:8px;">Rs. 0</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:18px;box-shadow:0 4px 15px rgba(0,0,0,.07);">
+    <div style="font-size:14px;color:#64748b;">📜 Transactions</div>
+    <div id="transactionCount" style="font-size:22px;font-weight:bold;margin-top:8px;">0</div>
+  </div>
+
+  <a href="/transactions.html" style="
+    background:#2563eb;
+    color:white;
+    padding:18px;
+    border-radius:18px;
+    text-decoration:none;
+    box-shadow:0 4px 15px rgba(37,99,235,.25);
+  ">
+    <div style="font-size:14px;">📜 View History</div>
+    <div style="font-size:18px;font-weight:bold;margin-top:8px;">Open →</div>
+  </a>
+</div>
+
+<script>
+async function loadDashboardSummary(){
+  try{
+    const walletResponse = await fetch("/api/wallet");
+    const walletData = await walletResponse.json();
+
+    if(walletData.success){
+      document.getElementById("totalDeposited").textContent =
+        "Rs. " + Number(walletData.wallet.totalDeposited || 0).toLocaleString();
+
+      document.getElementById("pendingAmount").textContent =
+        "Rs. " + Number(walletData.wallet.pendingAmount || 0).toLocaleString();
+    }
+
+    const transactionResponse = await fetch("/api/deposits");
+    const transactionData = await transactionResponse.json();
+
+    if(transactionData.success){
+      document.getElementById("transactionCount").textContent =
+        (transactionData.deposits || []).length;
+    }
+
+  }catch(error){
+    console.log("Dashboard summary error:", error);
+  }
+}
+
+loadDashboardSummary();
+</script>
+
+
+
+
+
+<div style="
+  max-width:600px;
+  margin:25px auto;
+  padding:20px;
+  text-align:center;
+">
+  <button
+    onclick="logoutUser()"
+    style="
+      width:100%;
+      padding:15px;
+      border:0;
+      border-radius:12px;
+      background:#dc2626;
+      color:white;
+      font-size:17px;
+      font-weight:bold;
+    "
+  >
+    🚪 Logout
+  </button>
+
+  <div id="logoutMessage" style="margin-top:10px;"></div>
+</div>
+
+<script>
+async function logoutUser(){
+
+  const message = document.getElementById("logoutMessage");
+
+  try{
+
+    const response = await fetch("/api/logout", {
+      method:"POST"
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<span style="color:#16a34a;">✅ Logged out successfully.</span>';
+
+      setTimeout(function(){
+        window.location.href = "/";
+      },700);
+
+    }else{
+
+      message.innerHTML =
+        '<span style="color:#dc2626;">Logout failed.</span>';
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<span style="color:#dc2626;">Server connection error.</span>';
+  }
+}
+</script>
+
+</body>
+</html>
+
+<script>
+async function showSelectedPlan() {
+  const selected = localStorage.getItem("selectedPlan");
+  if (!selected) return;
+
+  const plan = JSON.parse(selected);
+  const container = document.querySelector(".container");
+  if (!container) return;
+
+  const box = document.createElement("div");
+
+  box.style.cssText =
+    "background:white;margin:20px 0;padding:20px;border-radius:18px;box-shadow:0 5px 20px rgba(0,0,0,.08);";
+
+  box.innerHTML = `
+    <h2>📊 Selected Plan</h2>
+    <p><b>${plan.name}</b></p>
+    <p style="font-size:24px;color:#2563eb;font-weight:bold;">
+      ${plan.amount}
+    </p>
+    <button onclick="activateDemoInvestment()"
+      style="width:100%;padding:15px;border:0;border-radius:12px;background:#16a34a;color:white;font-size:17px;font-weight:bold;">
+      Activate Demo Investment
+    </button>
+  `;
+
+  container.prepend(box);
+}
+
+async function activateDemoInvestment() {
+  const selected = localStorage.getItem("selectedPlan");
+  if (!selected) return;
+
+  const plan = JSON.parse(selected);
+
+  const response = await fetch("/api/invest", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({planId: plan.id})
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    alert("Demo investment activated!");
+    localStorage.removeItem("selectedPlan");
+    location.reload();
+  } else {
+    alert(data.message);
+  }
+}
+
+showSelectedPlan();
+</script>

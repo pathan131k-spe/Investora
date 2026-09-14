@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investora — Invest • Grow • Earn</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:35px 20px;
+  border-radius:0 0 30px 30px;
+}
+
+.header h1{
+  margin:0 0 8px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:16px;
+  border-radius:15px;
+  margin-bottom:18px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  margin:15px 0;
+  border-radius:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.07);
+}
+
+.balance{
+  font-size:28px;
+  font-weight:bold;
+  color:#2563eb;
+  margin-top:8px;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+input{
+  width:100%;
+  padding:15px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  font-size:17px;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+  margin-top:12px;
+}
+
+button:disabled{
+  opacity:.6;
+}
+
+.message{
+  text-align:center;
+  padding:15px;
+  border-radius:12px;
+  margin-top:12px;
+}
+
+.success{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.history-item{
+  padding:15px 0;
+  border-bottom:1px solid #e2e8f0;
+}
+
+.history-item:last-child{
+  border-bottom:0;
+}
+
+.status{
+  font-weight:bold;
+  margin-top:5px;
+}
+</style>
+<script src="/auth-check.js"></script>
+
+<style id="horizontal-layout">
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  overflow-x:hidden;
+}
+
+#userNavigation{
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  overflow-x:auto !important;
+  gap:10px !important;
+  padding:10px !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+#userNavigation a{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+.card{
+  flex:0 0 300px !important;
+}
+
+section{
+  max-width:100%;
+}
+
+@media(max-width:700px){
+  .card,
+  .dashboard-card,
+  .plan-card,
+  .stat-card{
+    flex:0 0 85vw;
+    max-width:85vw;
+  }
+
+  .cards,
+  .card-container,
+  .card-grid,
+  .plans,
+  .plans-container{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:14px !important;
+    padding:8px 4px 16px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cards > *,
+  .card-container > *,
+  .card-grid > *,
+  .plans > *,
+  .plans-container > *{
+    flex:0 0 85vw !important;
+  }
+}
+</style>
+
+
+<style id="three-page-horizontal">
+@media (max-width:700px){
+  body{
+    overflow-x:hidden;
+  }
+
+  .card-grid,
+  .cards,
+  .plans,
+  .plans-container,
+  .dashboard-cards{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:14px !important;
+    padding:10px 5px 18px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .card-grid > *,
+  .cards > *,
+  .plans > *,
+  .plans-container > *,
+  .dashboard-cards > *{
+    flex:0 0 82vw !important;
+    max-width:82vw !important;
+  }
+}
+</style>
+
+
+<style id="professional-layout">
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
+}
+main{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  padding:18px 14px 40px;
+}
+section{
+  width:100%;
+  margin:0 auto 18px;
+}
+.card{
+  width:100%;
+  background:#fff;
+  border:1px solid #e5eaf2;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 5px 18px rgba(20,35,60,.07);
+}
+#userNavigation{
+  position:sticky!important;
+  top:0!important;
+  z-index:50!important;
+  width:100%!important;
+  padding:10px 12px!important;
+  background:#0d47a1!important;
+  box-shadow:0 3px 12px rgba(0,0,0,.12);
+}
+#userNavigation a{
+  flex:0 0 auto;
+  text-decoration:none;
+  padding:9px 13px;
+  border-radius:10px;
+  background:rgba(255,255,255,.12);
+  color:#fff!important;
+  font-size:13px;
+}
+#userNavigation a:hover{background:rgba(255,255,255,.22)}
+
+.balance,
+#balance{
+  font-size:28px;
+  font-weight:700;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:11px 16px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #d9e0ea;
+  border-radius:10px;
+  outline:none;
+}
+
+input:focus,select:focus{
+  border-color:#1976d2;
+}
+
+.history-item{
+  background:#f8fafc;
+  border:1px solid #e8edf4;
+  border-radius:12px;
+  padding:13px;
+  margin-bottom:10px;
+}
+
+#notificationsBox{
+  display:flex!important;
+  gap:12px;
+  overflow-x:auto;
+  padding:4px 2px 10px;
+  scroll-snap-type:x mandatory;
+}
+
+#notificationsBox>*{
+  flex:0 0 280px;
+  scroll-snap-align:start;
+}
+
+@media(min-width:700px){
+  main{
+    padding:25px 22px 50px;
+  }
+
+  .card-grid,
+  .cards,
+  .plans,
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+  }
+
+  .card-grid .card,
+  .cards .card,
+  .plans .card,
+  .grid .card{
+    margin-bottom:0;
+  }
+}
+
+@media(min-width:1000px){
+  .card-grid,
+  .cards,
+  .plans,
+  .grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:699px){
+  main{padding:14px 10px 35px}
+  .card{padding:15px;border-radius:14px}
+  h1{font-size:24px}
+  h2{font-size:20px}
+  h3{font-size:17px}
+}
+</style>
+
+
+<style id="FINAL-PROFESSIONAL-DESIGN">
+/* ===== FINAL PROFESSIONAL DESIGN ===== */
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0!important;
+  background:#f3f6fb!important;
+  color:#172033;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.container,
+main{
+  width:100%!important;
+  max-width:1100px!important;
+  margin:0 auto!important;
+  padding:18px 16px 45px!important;
+}
+
+/* Navigation */
+#userNavigation{
+  position:sticky!important;
+  top:0!important;
+  z-index:999!important;
+  width:100%!important;
+  display:flex!important;
+  gap:10px!important;
+  padding:10px 14px!important;
+  overflow-x:auto!important;
+  white-space:nowrap!important;
+  background:#0d47a1!important;
+  box-shadow:0 3px 15px rgba(0,0,0,.16)!important;
+}
+
+#userNavigation a{
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:46px!important;
+  padding:10px 17px!important;
+  border-radius:13px!important;
+  background:#2867df!important;
+  color:white!important;
+  text-decoration:none!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  box-shadow:0 2px 6px rgba(0,0,0,.12)!important;
+}
+
+#userNavigation a:hover{
+  transform:translateY(-1px);
+}
+
+/* Cards */
+.card{
+  background:#fff!important;
+  border:1px solid #e6ebf2!important;
+  border-radius:22px!important;
+  padding:22px!important;
+  margin:0 0 18px!important;
+  box-shadow:0 8px 25px rgba(31,52,82,.08)!important;
+}
+
+/* Main headings */
+h1,h2,h3{
+  color:#172033;
+}
+
+h1{
+  font-size:30px;
+  line-height:1.2;
+}
+
+h2{
+  font-size:24px;
+}
+
+h3{
+  font-size:20px;
+}
+
+/* Buttons */
+button{
+  border:none!important;
+  border-radius:13px!important;
+  min-height:48px!important;
+  padding:11px 18px!important;
+  font-size:15px!important;
+  font-weight:700!important;
+  cursor:pointer!important;
+  transition:.2s!important;
+}
+
+button:hover{
+  transform:translateY(-1px);
+  opacity:.94;
+}
+
+/* Inputs */
+input,
+select,
+textarea{
+  width:100%!important;
+  min-height:48px!important;
+  padding:12px 14px!important;
+  border:1px solid #dce3ed!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  font-size:15px!important;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none!important;
+  border-color:#2867df!important;
+  box-shadow:0 0 0 3px rgba(40,103,223,.10)!important;
+}
+
+/* Dashboard/stat cards */
+.balance,
+#balance{
+  font-size:32px!important;
+  font-weight:800!important;
+}
+
+/* History */
+.history-item{
+  background:#f8fafc!important;
+  border:1px solid #e8edf4!important;
+  border-radius:14px!important;
+  padding:14px!important;
+  margin-bottom:10px!important;
+}
+
+/* Notifications */
+#notificationsBox{
+  display:flex!important;
+  gap:12px!important;
+  overflow-x:auto!important;
+  padding:4px 2px 12px!important;
+  scroll-snap-type:x mandatory!important;
+}
+
+#notificationsBox>*{
+  flex:0 0 280px!important;
+  scroll-snap-align:start!important;
+}
+
+/* Better desktop arrangement */
+@media(min-width:750px){
+
+  .container,
+  main{
+    padding:25px 22px 55px!important;
+  }
+
+  /* Direct cards become a clean grid where possible */
+  .container{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+    align-items:start;
+  }
+
+  .container > .card{
+    margin:0!important;
+  }
+
+  /* Full-width cards */
+  .container > .card:first-child,
+  .container > .card:last-child{
+    grid-column:1/-1;
+  }
+}
+
+/* Mobile */
+@media(max-width:749px){
+
+  .container,
+  main{
+    padding:14px 10px 35px!important;
+  }
+
+  .card{
+    padding:18px!important;
+    border-radius:19px!important;
+  }
+
+  h1{
+    font-size:26px!important;
+  }
+
+  h2{
+    font-size:22px!important;
+  }
+
+  h3{
+    font-size:18px!important;
+  }
+
+  #userNavigation a{
+    min-height:44px!important;
+    padding:9px 14px!important;
+    font-size:14px!important;
+  }
+}
+
+/* Small phones */
+@media(max-width:390px){
+
+  .container,
+  main{
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+
+  .card{
+    padding:15px!important;
+    border-radius:17px!important;
+  }
+
+  #userNavigation{
+    gap:7px!important;
+    padding:8px!important;
+  }
+
+  #userNavigation a{
+    padding:8px 12px!important;
+    font-size:13px!important;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h1>💰 Deposit</h1>
+  <p>Manage your demo deposit requests</p>
+</div>
+
+<div class="container">
+
+  <div class="demo">
+    ⚠️ <b>Demo Mode</b> — No real money is processed.
+  </div>
+
+  <div class="card">
+    <div>Current Demo Balance</div>
+    <div id="balance" class="balance">Rs. 0</div>
+  </div>
+
+  <div class="card">
+    <h2>💰 New Deposit Request</h2>
+
+    <label for="amount">Amount</label>
+
+    <input
+      id="amount"
+      type="number"
+      min="1"
+      placeholder="Enter amount"
+    >
+
+    <button id="submitBtn" onclick="submitDeposit()">
+      Submit Demo Deposit
+    </button>
+
+    <div id="message"></div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Deposit History</h2>
+    <div id="history">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadWallet(){
+
+  try{
+
+    const response = await fetch("/api/wallet");
+    const data = await response.json();
+
+    if(data.success){
+
+      document.getElementById("balance").textContent =
+        "Rs. " +
+        Number(data.wallet.balance || 0).toLocaleString();
+    }
+
+  }catch(error){
+
+    console.log("Wallet error:",error);
+  }
+}
+
+
+async function loadHistory(){
+
+  const box = document.getElementById("history");
+
+  try{
+
+    const response = await fetch("/api/deposits");
+    const data = await response.json();
+
+    if(!data.success){
+
+      box.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Please login first") +
+        '</div>';
+
+      return;
+    }
+
+    const deposits = data.deposits || [];
+
+    if(deposits.length === 0){
+
+      box.innerHTML =
+        '<div style="color:#64748b;text-align:center;padding:20px;">' +
+        'No deposit requests yet.' +
+        '</div>';
+
+      return;
+    }
+
+    box.innerHTML = deposits
+      .slice()
+      .reverse()
+      .map(deposit => {
+
+        let status = "⏳ Pending";
+        let color = "#d97706";
+
+        if(deposit.status === "approved"){
+          status = "✅ Approved";
+          color = "#16a34a";
+        }
+
+        if(deposit.status === "rejected"){
+          status = "❌ Rejected";
+          color = "#dc2626";
+        }
+
+        return `
+          <div class="history-item">
+
+            <b>Demo Deposit</b>
+
+            <div style="font-size:21px;font-weight:bold;margin-top:6px;">
+              Rs. ${Number(deposit.amount || 0).toLocaleString()}
+            </div>
+
+            <div class="status" style="color:${color}">
+              ${status}
+            </div>
+
+            <div style="color:#64748b;font-size:13px;margin-top:5px;">
+              ${new Date(deposit.createdAt).toLocaleString()}
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  }catch(error){
+
+    box.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+}
+
+
+async function submitDeposit(){
+
+  const amountInput = document.getElementById("amount");
+  const button = document.getElementById("submitBtn");
+  const message = document.getElementById("message");
+
+  const amount = Number(amountInput.value);
+
+  message.innerHTML = "";
+
+  if(!amount || amount <= 0){
+
+    message.innerHTML =
+      '<div class="message error">Please enter a valid amount.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Submitting...";
+
+  try{
+
+    const response = await fetch("/api/deposit",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        amount:amount
+      })
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">' +
+        '✅ Demo deposit request submitted successfully.' +
+        '</div>';
+
+      amountInput.value = "";
+
+      await loadWallet();
+      await loadHistory();
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Deposit failed.") +
+        '</div>';
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Submit Demo Deposit";
+}
+
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+loadWallet();
+loadHistory();
+
+</script>
+
+</body>
+</html>

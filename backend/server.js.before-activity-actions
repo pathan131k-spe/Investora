@@ -1,0 +1,717 @@
+function logActivity(userId, action, details = "") {
+  const db = readDB();
+
+  if (!db.activityLogs) {
+    db.activityLogs = [];
+  }
+
+  db.activityLogs.push({
+    id: Date.now().toString(),
+    userId: userId || null,
+    action: action,
+    details: details,
+    createdAt: new Date().toISOString()
+  });
+
+  writeDB(db);
+}const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const bcrypt = require("bcryptjs");
+const session = require("express-session");
+
+const app = express();
+const PORT = 3000;
+
+const DB_FILE = path.join(__dirname, "database.json");
+
+if (!fs.existsSync(DB_FILE)) {
+  fs.writeFileSync(DB_FILE, JSON.stringify({ users: [] }, null, 2));
+}
+
+function readDB() {
+  return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+}
+
+function writeDB(data) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: "my-development-secret-change-later",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
+app.post("/api/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters"
+      });
+    }
+
+    const db = readDB();
+
+    const existingUser = db.users.find(
+      user => user.email === email.toLowerCase()
+    );
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered"
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const user = {
+      id: Date.now().toString(),
+      name: name,
+      email: email.toLowerCase(),
+      passwordHash: passwordHash,
+      role: "user",
+      createdAt: new Date().toISOString()
+    };
+
+    db.users.push(user);
+    writeDB(db);
+
+    req.session.userId = user.id;
+
+    res.json({
+      success: true,
+      message: "Account created successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
+    }
+
+    const db = readDB();
+
+    const user = db.users.find(
+      user => user.email === email.toLowerCase()
+    );
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    const passwordOK = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
+
+    if (!passwordOK) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    req.session.userId = user.id;
+
+    res.json({
+      success: true,
+      message: "Login successful"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
+app.get("/api/me", (req, res) => {
+  if (!req.session.userId) {
+    return res.json({ loggedIn: false });
+  }
+
+  const db = readDB();
+
+  const user = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!user) {
+    return res.json({ loggedIn: false });
+  }
+
+  res.json({
+    loggedIn: true,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email
+    }
+  });
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({
+      success: true,
+      message: "Logged out"
+    });
+  });
+});
+
+app.use(express.static("../frontend"));
+app.post("/api/deposit", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const amount = Number(req.body.amount);
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Enter a valid amount"
+    });
+  }
+
+  const db = readDB();
+
+  if (!db.deposits) {
+    db.deposits = [];
+  }
+
+  const deposit = {
+    id: Date.now().toString(),
+    userId: req.session.userId,
+    amount: amount,
+    status: "pending",
+    createdAt: new Date().toISOString()
+  };
+
+  db.deposits.push(deposit);
+  writeDB(db);
+
+  res.json({
+    success: true,
+    message: "Deposit request submitted successfully"
+  });
+});
+app.get("/api/deposits", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+  const deposits = (db.deposits || []).filter(
+    deposit => deposit.userId === req.session.userId
+  );
+
+  res.json({
+    success: true,
+    deposits: deposits
+  });
+});
+
+// ADMIN DEMO API
+app.get("/api/admin/deposits", (req, res) => {
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  res.json({
+    success: true,
+    deposits: db.deposits || []
+  });
+});
+
+
+// DEMO ADMIN APPROVE / REJECT
+app.post("/api/admin/deposits/:id/status", (req, res) => {
+  const db = readDB();
+  const admin = db.users.find(user => user.id === req.session.userId);
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({ success:false, message:"Admin access required" });
+  }
+
+  const { status } = req.body;
+  if (!["approved","rejected"].includes(status)) {
+    return res.status(400).json({ success:false, message:"Invalid status" });
+  }
+
+  const deposit = (db.deposits || []).find(d => d.id === req.params.id);
+  if (!deposit) {
+    return res.status(404).json({ success:false, message:"Deposit not found" });
+  }
+
+  deposit.status = status;
+  deposit.updatedAt = new Date().toISOString();
+  writeDB(db);
+
+  res.json({ success:true, message:"Deposit status updated", deposit });
+});
+
+
+
+
+// ADMIN USERS API
+app.get("/api/admin/users", (req, res) => {
+
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  const users = db.users.map(user => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    createdAt: user.createdAt
+  }));
+
+  res.json({
+    success: true,
+    users: users
+  });
+
+});
+// DEMO ADMIN ROLE CHANGE
+app.post("/api/admin/users/:id/role", (req, res) => {
+
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  const { role } = req.body;
+
+  if (!["user", "admin"].includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid role"
+    });
+  }
+
+  const user = db.users.find(
+    user => user.id === req.params.id
+  );
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  user.role = role;
+  writeDB(db);
+
+  res.json({
+    success: true,
+    message: "User role updated",
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
+
+});
+
+
+// DEMO INVESTMENT PLANS API
+app.get("/api/admin/plans", (req, res) => {
+
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  const plans = db.plans || [
+    { id: "starter", name: "Starter Plan", amount: 100, active: true },
+    { id: "basic", name: "Basic Plan", amount: 500, active: true },
+    { id: "standard", name: "Standard Plan", amount: 1000, active: true },
+    { id: "plus", name: "Plus Plan", amount: 2500, active: true },
+    { id: "premium", name: "Premium Plan", amount: 5000, active: true }
+  ];
+
+  db.plans = plans;
+  writeDB(db);
+
+  res.json({
+    success: true,
+    plans: plans
+  });
+
+});
+
+
+// DEMO INVESTMENT PLANS API
+app.get("/api/plans", (req, res) => {
+
+  const db = readDB();
+
+  if (!db.plans) {
+    db.plans = [
+      { id: "starter", name: "Starter Plan", amount: 100, active: true },
+      { id: "standard", name: "Standard Plan", amount: 1000, active: true },
+      { id: "premium", name: "Premium Plan", amount: 5000, active: true }
+    ];
+    writeDB(db);
+  }
+
+  res.json({
+    success: true,
+    plans: db.plans
+  });
+
+});
+
+// DEMO PLAN STATUS API
+app.post("/api/admin/plans/:id/status", (req, res) => {
+
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  const plan = (db.plans || []).find(
+    plan => plan.id === req.params.id
+  );
+
+  if (!plan) {
+    return res.status(404).json({
+      success: false,
+      message: "Plan not found"
+    });
+  }
+
+  plan.active = !plan.active;
+  writeDB(db);
+
+  res.json({
+    success: true,
+    message: plan.active ? "Plan activated" : "Plan deactivated",
+    plan: plan
+  });
+
+});
+
+
+// DEMO INVESTMENT ACTIVATION API
+app.post("/api/invest", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const { planId } = req.body;
+
+  const db = readDB();
+  const plan = (db.plans || []).find(
+    p => p.id === planId && p.active
+  );
+
+  if (!plan) {
+    return res.status(404).json({
+      success: false,
+      message: "Active plan not found"
+    });
+  }
+
+  if (!db.investments) {
+    db.investments = [];
+  }
+
+  const existing = db.investments.find(
+    investment =>
+      investment.userId === req.session.userId &&
+      investment.status === "active"
+  );
+
+  if (existing) {
+    return res.status(400).json({
+      success: false,
+      message: "You already have an active demo investment"
+    });
+  }
+
+  const investment = {
+    id: Date.now().toString(),
+    userId: req.session.userId,
+    planId: plan.id,
+    planName: plan.name,
+    amount: Number(plan.amount),
+    status: "active",
+    createdAt: new Date().toISOString()
+  };
+
+  db.investments.push(investment);
+  writeDB(db);
+
+  res.json({
+    success: true,
+    message: "Demo investment activated",
+    investment: investment
+  });
+});
+
+app.get("/api/investment", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const investments = (db.investments || []).filter(
+    investment => investment.userId === req.session.userId
+  );
+
+  res.json({
+    success: true,
+    investments: investments
+  });
+});app.listen(PORT, () => {
+  console.log("Website running on port 3000");
+});
+
+// DEMO WALLET API
+app.get("/api/wallet", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const userDeposits = (db.deposits || []).filter(
+    deposit => deposit.userId === req.session.userId
+  );
+
+  const approved = userDeposits.filter(
+    deposit => deposit.status === "approved"
+  );
+
+  const pending = userDeposits.filter(
+    deposit => deposit.status === "pending"
+  );
+
+  const rejected = userDeposits.filter(
+    deposit => deposit.status === "rejected"
+  );
+
+  const totalDeposited = approved.reduce(
+    (sum, deposit) => sum + Number(deposit.amount || 0),
+    0
+  );
+
+  const pendingAmount = pending.reduce(
+    (sum, deposit) => sum + Number(deposit.amount || 0),
+    0
+  );
+
+  res.json({
+    success: true,
+    wallet: {
+      balance: totalDeposited,
+      totalDeposited: totalDeposited,
+      pendingAmount: pendingAmount,
+      rejectedAmount: rejected.reduce(
+        (sum, deposit) => sum + Number(deposit.amount || 0),
+        0
+      )
+    }
+  });
+});
+
+
+
+// ACTIVITY LOG API
+
+app.post("/api/activity", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const { action, details = "" } = req.body;
+
+  if (!action) {
+    return res.status(400).json({
+      success: false,
+      message: "Action is required"
+    });
+  }
+
+  logActivity(
+    req.session.userId,
+    String(action).slice(0, 100),
+    String(details).slice(0, 300)
+  );
+
+  res.json({
+    success: true,
+    message: "Activity logged"
+  });
+});
+
+app.get("/api/admin/activity", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  const db = readDB();
+
+  const admin = db.users.find(
+    user => user.id === req.session.userId
+  );
+
+  if (!admin || admin.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access required"
+    });
+  }
+
+  const logs = (db.activityLogs || [])
+    .slice()
+    .reverse()
+    .slice(0, 200);
+
+  res.json({
+    success: true,
+    logs: logs
+  });
+});
+

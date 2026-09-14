@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Investment Site</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:45px 20px;
+  text-align:center;
+  border-radius:0 0 35px 35px;
+}
+
+.logo{
+  font-size:48px;
+}
+
+.header h1{
+  margin:10px 0;
+}
+
+.header p{
+  margin:0;
+  opacity:.9;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:22px;
+  margin:18px 0;
+  border-radius:20px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.tabs button{
+  flex:1;
+  padding:13px;
+  border:0;
+  border-radius:10px;
+  background:#e2e8f0;
+  color:#334155;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#2563eb;
+  color:white;
+}
+
+.form{
+  display:none;
+}
+
+.form.active{
+  display:block;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin:14px 0 7px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  font-size:16px;
+}
+
+.submit{
+  width:100%;
+  padding:15px;
+  margin-top:18px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+}
+
+.submit:disabled{
+  opacity:.6;
+}
+
+.message{
+  padding:13px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.success{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:15px;
+  border-radius:13px;
+  line-height:1.5;
+  font-size:14px;
+}
+
+.small{
+  color:#64748b;
+  font-size:13px;
+  margin-top:7px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">💼</div>
+  <h1>Investment Platform</h1>
+  <p>Secure account access</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <div class="tabs">
+      <button id="loginTab" class="active" onclick="showForm('login')">
+        Login
+      </button>
+
+      <button id="registerTab" onclick="showForm('register')">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+
+    <div id="loginForm" class="form active">
+
+      <h2>🔐 Login</h2>
+
+      <label>Email</label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        autocomplete="email"
+        placeholder="Enter your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+      >
+
+      <button
+        id="loginBtn"
+        class="submit"
+        onclick="login()"
+      >
+        Login
+      </button>
+
+      <div id="loginMessage"></div>
+
+    </div>
+
+
+    <!-- REGISTER -->
+
+    <div id="registerForm" class="form">
+
+      <h2>📝 Create Account</h2>
+
+      <label>Name</label>
+
+      <input
+        id="registerName"
+        type="text"
+        autocomplete="name"
+        placeholder="Enter your name"
+      >
+
+      <label>Email</label>
+
+      <input
+        id="registerEmail"
+        type="email"
+        autocomplete="email"
+        placeholder="Enter your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="registerPassword"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Minimum 8 characters"
+      >
+
+      <div class="small">
+        Password must contain at least 8 characters.
+      </div>
+
+      <button
+        id="registerBtn"
+        class="submit"
+        onclick="register()"
+      >
+        Create Account
+      </button>
+
+      <div id="registerMessage"></div>
+
+    </div>
+
+  </div>
+
+  <div class="demo">
+    ⚠️ <b>Demo Investment Platform</b><br>
+    Investment plans and deposits currently operate in Demo Mode.
+    No real money or real investment returns are processed.
+  </div>
+
+</div>
+
+
+<script>
+
+function showForm(type){
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  const registerForm =
+    document.getElementById("registerForm");
+
+  const loginTab =
+    document.getElementById("loginTab");
+
+  const registerTab =
+    document.getElementById("registerTab");
+
+  if(type === "login"){
+
+    loginForm.classList.add("active");
+    registerForm.classList.remove("active");
+
+    loginTab.classList.add("active");
+    registerTab.classList.remove("active");
+
+  }else{
+
+    registerForm.classList.add("active");
+    loginForm.classList.remove("active");
+
+    registerTab.classList.add("active");
+    loginTab.classList.remove("active");
+  }
+}
+
+
+async function login(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const button =
+    document.getElementById("loginBtn");
+
+  const message =
+    document.getElementById("loginMessage");
+
+  message.innerHTML = "";
+
+  if(!email || !password){
+
+    message.innerHTML =
+      '<div class="message error">Please enter email and password.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Logging in...";
+
+  try{
+
+    const response = await fetch("/api/login",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        email:email,
+        password:password
+      })
+
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">✅ Login successful. Opening dashboard...</div>';
+
+      setTimeout(function(){
+
+        window.location.href =
+          "/dashboard.html";
+
+      },700);
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Login failed.") +
+        '</div>';
+
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Login";
+}
+
+
+async function register(){
+
+  const name =
+    document.getElementById("registerName").value.trim();
+
+  const email =
+    document.getElementById("registerEmail").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+  const button =
+    document.getElementById("registerBtn");
+
+  const message =
+    document.getElementById("registerMessage");
+
+  message.innerHTML = "";
+
+  if(!name || !email || !password){
+
+    message.innerHTML =
+      '<div class="message error">Please fill all fields.</div>';
+
+    return;
+  }
+
+  if(password.length < 8){
+
+    message.innerHTML =
+      '<div class="message error">Password must be at least 8 characters.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Creating account...";
+
+  try{
+
+    const response = await fetch("/api/register",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        name:name,
+        email:email,
+        password:password
+      })
+
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">✅ Account created. Opening dashboard...</div>';
+
+      setTimeout(function(){
+
+        window.location.href =
+          "/dashboard.html";
+
+      },700);
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Registration failed.") +
+        '</div>';
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Create Account";
+}
+
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+</script>
+
+</body>
+</html>

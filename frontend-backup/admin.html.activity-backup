@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f6fb;
+}
+.header{
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  color:white;
+  padding:28px 20px;
+}
+.header h1{margin:0;font-size:28px}
+.container{max-width:600px;margin:25px auto;padding:0 18px}
+.card{
+  background:white;
+  padding:20px;
+  margin-bottom:15px;
+  border-radius:16px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+.amount{
+  font-size:22px;
+  font-weight:bold;
+  color:#2563eb;
+}
+.status{
+  font-weight:bold;
+}
+button{
+  border:0;
+  padding:12px 16px;
+  border-radius:9px;
+  color:white;
+  font-weight:bold;
+  margin:5px 5px 0 0;
+}
+.approve{background:#16a34a}
+.reject{background:#dc2626}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>🛡️ Admin Dashboard</h1>
+  <p>Demo Deposit Management</p>
+</div>
+
+<div class="container">
+  <h2>💳 Deposit Requests</h2>
+  <div id="message">Loading...</div>
+  <div id="deposits"></div>
+</div>
+
+<div class="card">
+  <h2>👥 Users Management</h2>
+  <div id="users">Loading users...</div>
+</div>
+<div class="card">
+  <h2>📊 Investment Plans Management</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Demo plans — real money/returns are not active.
+  </p>
+  <div id="plans">Loading plans...</div>
+</div>
+
+<script>
+
+async function loadDeposits(){
+
+  const message = document.getElementById("message");
+  const container = document.getElementById("deposits");
+
+  try{
+
+    const response = await fetch("/api/admin/deposits");
+    const data = await response.json();
+
+    if(!data.success){
+      message.innerHTML = data.message;
+      return;
+    }
+
+    message.innerHTML = "";
+
+    if(data.deposits.length === 0){
+      container.innerHTML = "<div class='card'>No deposits yet.</div>";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.deposits.slice().reverse().forEach(deposit => {
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="amount">
+          Rs. ${Number(deposit.amount).toLocaleString()}
+        </div>
+
+        <p>
+          Status:
+          <span class="status">${deposit.status}</span>
+        </p>
+
+        <p>User ID: ${deposit.userId}</p>
+        <p>Deposit ID: ${deposit.id}</p>
+
+        <button class="approve"
+          onclick="changeStatus('${deposit.id}','approved')">
+          ✓ Approve
+        </button>
+
+        <button class="reject"
+          onclick="changeStatus('${deposit.id}','rejected')">
+          ✕ Reject
+        </button>
+      `;
+
+      container.appendChild(card);
+    });
+
+  }catch(error){
+
+    message.innerHTML = "Server connection error";
+
+  }
+}
+
+
+async function changeStatus(id,status){
+
+  try{
+
+    const response = await fetch(
+      "/api/admin/deposits/" + id + "/status",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({status:status})
+      }
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Demo deposit status: " + status);
+      loadDeposits();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+loadDeposits();
+
+
+async function loadUsers(){
+
+  const container = document.getElementById("users");
+
+  try{
+
+    const response = await fetch("/api/admin/users");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    if(data.users.length === 0){
+      container.innerHTML = "<p>No users found.</p>";
+      return;
+    }
+
+    container.innerHTML = data.users.map(user => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong>${user.name}</strong>
+        <p style="margin:6px 0;">${user.email}</p>
+        <small>Role: <b>${user.role}</b></small>
+        <br><br>
+        <button onclick="changeRole('${user.id}','${user.role === "admin" ? "user" : "admin"}')"
+          style="background:#2563eb;color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+          Change to ${user.role === "admin" ? "User" : "Admin"}
+        </button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadUsers();
+
+
+async function changeRole(id, role){
+
+  try{
+
+    const response = await fetch("/api/admin/users/" + id + "/role", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({role:role})
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Role changed to " + role);
+      loadUsers();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+
+async function loadPlans(){
+
+  const container = document.getElementById("plans");
+
+  try{
+
+    const response = await fetch("/api/admin/plans");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    container.innerHTML = data.plans.map(plan => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong style="font-size:18px;">${plan.name}</strong>
+        <p style="margin:7px 0;color:#2563eb;font-weight:bold;">
+          Rs. ${Number(plan.amount).toLocaleString()}
+        </p>
+        <small>Status: <b>${plan.active ? "Active" : "Inactive"}</b></small>
+<br><br>
+<button onclick="togglePlan('${plan.id}')"
+style="background:${plan.active ? "#dc2626" : "#16a34a"};color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+${plan.active ? "Deactivate" : "Activate"}
+</button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadPlans();
+
+
+async function togglePlan(id){
+
+  try{
+
+    const response = await fetch("/api/admin/plans/" + id + "/status", {
+      method:"POST"
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      loadPlans();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+</script>
+
+</body>
+</html>

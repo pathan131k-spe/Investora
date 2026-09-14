@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Investora — Invest • Grow • Earn</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:45px 20px;
+  text-align:center;
+  border-radius:0 0 35px 35px;
+}
+
+.logo{
+  font-size:48px;
+}
+
+.header h1{
+  margin:10px 0;
+}
+
+.header p{
+  margin:0;
+  opacity:.9;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:22px;
+  margin:18px 0;
+  border-radius:20px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+.tabs button{
+  flex:1;
+  padding:13px;
+  border:0;
+  border-radius:10px;
+  background:#e2e8f0;
+  color:#334155;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#2563eb;
+  color:white;
+}
+
+.form{
+  display:none;
+}
+
+.form.active{
+  display:block;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin:14px 0 7px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  font-size:16px;
+}
+
+.submit{
+  width:100%;
+  padding:15px;
+  margin-top:18px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+}
+
+.submit:disabled{
+  opacity:.6;
+}
+
+.message{
+  padding:13px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.success{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:15px;
+  border-radius:13px;
+  line-height:1.5;
+  font-size:14px;
+}
+
+.small{
+  color:#64748b;
+  font-size:13px;
+  margin-top:7px;
+}
+</style>
+
+<style id="horizontal-layout">
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  overflow-x:hidden;
+}
+
+#userNavigation{
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  overflow-x:auto !important;
+  gap:10px !important;
+  padding:10px !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+#userNavigation a{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+.card{
+  flex:0 0 300px !important;
+}
+
+section{
+  max-width:100%;
+}
+
+@media(max-width:700px){
+  .card,
+  .dashboard-card,
+  .plan-card,
+  .stat-card{
+    flex:0 0 85vw;
+    max-width:85vw;
+  }
+
+  .cards,
+  .card-container,
+  .card-grid,
+  .plans,
+  .plans-container{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:14px !important;
+    padding:8px 4px 16px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cards > *,
+  .card-container > *,
+  .card-grid > *,
+  .plans > *,
+  .plans-container > *{
+    flex:0 0 85vw !important;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">💼</div>
+  <h1>Investora</h1>
+  <p>Secure account access</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+
+    <div class="tabs">
+      <button id="loginTab" class="active" onclick="showForm('login')">
+        Login
+      </button>
+
+      <button id="registerTab" onclick="showForm('register')">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN -->
+
+    <div id="loginForm" class="form active">
+
+      <h2>🔐 Login</h2>
+
+      <label>Email</label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        autocomplete="email"
+        placeholder="Enter your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Enter your password"
+      >
+
+
+
+
+
+      <button
+        id="loginBtn"
+        class="submit"
+        onclick="login()"
+      >
+        Login
+      </button>
+
+      <div id="loginMessage"></div>
+
+    </div>
+
+
+    <!-- REGISTER -->
+
+    <div id="registerForm" class="form">
+
+      <h2>📝 Create Account</h2>
+
+      <label>Name</label>
+
+      <input
+        id="registerName"
+        type="text"
+        autocomplete="name"
+        placeholder="Enter your name"
+      >
+
+      <label>Email</label>
+
+      <input
+        id="registerEmail"
+        type="email"
+        autocomplete="email"
+        placeholder="Enter your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="registerPassword"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Minimum 8 characters"
+      >
+
+      <div class="small">
+        Password must contain at least 8 characters.
+
+<!-- REGISTER-REFERRAL-FIELD -->
+<div id="registerReferralField" style="
+  margin:16px 0;
+  padding:15px;
+  border:1px solid #dbe5ff;
+  border-radius:14px;
+  background:#f5f8ff;
+">
+  <label style="
+    display:block;
+    margin-bottom:8px;
+    font-weight:700;
+    font-size:15px;
+  ">
+    🎁 Referral Code
+    <span style="font-weight:400;color:#667085;">(Optional)</span>
+  </label>
+
+  <input
+    id="registrationReferralCode"
+    name="referralCode"
+    type="text"
+    placeholder="Example: REF-A1B2C3D4"
+    autocomplete="off"
+    style="
+      width:100%;
+      box-sizing:border-box;
+      padding:13px;
+      border:1px solid #ccd6e6;
+      border-radius:10px;
+      font-size:15px;
+      background:#fff;
+    "
+  >
+
+  <small style="
+    display:block;
+    margin-top:7px;
+    color:#667085;
+  ">
+    Agar kisi ne aapko referral code diya hai to yahan enter karein.
+  </small>
+</div>
+<!-- END REGISTER-REFERRAL-FIELD -->
+
+      </div>
+
+      <button
+        id="registerBtn"
+        class="submit"
+        onclick="register()"
+      >
+        Create Account
+      </button>
+
+      <div id="registerMessage"></div>
+
+    </div>
+
+  </div>
+
+  <div class="demo">
+    ⚠️ <b>Demo Investora</b><br>
+    Investment plans and deposits currently operate in Demo Mode.
+    No real money or real investment returns are processed.
+  </div>
+
+</div>
+
+
+<script>
+
+function showForm(type){
+
+  const loginForm =
+    document.getElementById("loginForm");
+
+  const registerForm =
+    document.getElementById("registerForm");
+
+  const loginTab =
+    document.getElementById("loginTab");
+
+  const registerTab =
+    document.getElementById("registerTab");
+
+  if(type === "login"){
+
+    loginForm.classList.add("active");
+    registerForm.classList.remove("active");
+
+    loginTab.classList.add("active");
+    registerTab.classList.remove("active");
+
+  }else{
+
+    registerForm.classList.add("active");
+    loginForm.classList.remove("active");
+
+    registerTab.classList.add("active");
+    loginTab.classList.remove("active");
+  }
+}
+
+
+async function login(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const button =
+    document.getElementById("loginBtn");
+
+  const message =
+    document.getElementById("loginMessage");
+
+  message.innerHTML = "";
+
+  if(!email || !password){
+
+    message.innerHTML =
+      '<div class="message error">Please enter email and password.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Logging in...";
+
+  try{
+
+    const response = await fetch("/api/login",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        email:email,
+        password:password
+      })
+
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">✅ Login successful. Opening dashboard...</div>';
+
+      setTimeout(function(){
+
+        window.location.href =
+          "/dashboard.html";
+
+      },700);
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Login failed.") +
+        '</div>';
+
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Login";
+}
+
+
+async function register(){
+
+  const name =
+    document.getElementById("registerName").value.trim();
+
+  const email =
+    document.getElementById("registerEmail").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+  const button =
+    document.getElementById("registerBtn");
+
+  const message =
+    document.getElementById("registerMessage");
+
+  message.innerHTML = "";
+
+  if(!name || !email || !password){
+
+    message.innerHTML =
+      '<div class="message error">Please fill all fields.</div>';
+
+    return;
+  }
+
+  if(password.length < 8){
+
+    message.innerHTML =
+      '<div class="message error">Password must be at least 8 characters.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Creating account...";
+
+  try{
+
+    const response = await fetch("/api/register",{
+
+      method:"POST",
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        name:name,
+        email:email,
+        password:password
+      })
+
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">✅ Account created. Opening dashboard...</div>';
+
+      setTimeout(function(){
+
+        window.location.href =
+          "/dashboard.html";
+
+      },700);
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Registration failed.") +
+        '</div>';
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Create Account";
+}
+
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+</script>
+
+
+<div id="forgotPasswordBox" style="
+  display:none;
+  margin-top:18px;
+  padding:18px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+">
+  <h3 style="margin-top:0">🔐 Forgot Password</h3>
+
+  <p style="font-size:14px;color:#64748b">
+    Enter your registered email to create a password reset request.
+  </p>
+
+  <input
+    id="forgotEmail"
+    type="email"
+    placeholder="Enter your email"
+    style="width:100%;padding:12px;border:1px solid #dbe3ef;border-radius:10px;margin-bottom:10px"
+  >
+
+  <button
+    onclick="requestPasswordReset()"
+    style="width:100%;background:#1976d2;color:white"
+  >
+    Send Reset Request
+  </button>
+
+  <div id="forgotMessage" style="margin-top:12px;font-size:14px"></div>
+
+  <div id="resetArea" style="display:none;margin-top:15px">
+    <input
+      id="resetToken"
+      placeholder="Reset token"
+      style="width:100%;padding:12px;border:1px solid #dbe3ef;border-radius:10px;margin-bottom:10px"
+    >
+
+    <input
+      id="newForgotPassword"
+      type="password"
+      placeholder="New password (8+ characters)"
+      style="width:100%;padding:12px;border:1px solid #dbe3ef;border-radius:10px;margin-bottom:10px"
+    >
+
+    <button
+      onclick="resetForgotPassword()"
+      style="width:100%;background:#0d47a1;color:white"
+    >
+      Reset Password
+    </button>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:12px">
+  <button
+    type="button"
+    onclick="toggleForgotPassword()"
+    style="background:none;color:#1976d2;padding:5px"
+  >
+    Forgot Password?
+  </button>
+</div>
+
+
+<script id="forgot-password-script">
+function toggleForgotPassword(){
+  const box = document.getElementById("forgotPasswordBox");
+  if(!box) return;
+
+  box.style.display =
+    box.style.display === "none" ? "block" : "none";
+}
+
+async function requestPasswordReset(){
+  const email =
+    document.getElementById("forgotEmail").value.trim();
+
+  const message =
+    document.getElementById("forgotMessage");
+
+  if(!email){
+    message.textContent = "Please enter your email.";
+    return;
+  }
+
+  try{
+    const response = await fetch("/api/forgot-password",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({email})
+    });
+
+    const data = await response.json();
+
+    message.textContent = data.message || "Request completed.";
+
+    if(data.developmentToken){
+      document.getElementById("resetArea").style.display="block";
+      document.getElementById("resetToken").value =
+        data.developmentToken;
+    }
+  }catch(error){
+    message.textContent = "Server connection error.";
+  }
+}
+
+async function resetForgotPassword(){
+  const token =
+    document.getElementById("resetToken").value.trim();
+
+  const newPassword =
+    document.getElementById("newForgotPassword").value;
+
+  const message =
+    document.getElementById("forgotMessage");
+
+  if(!token || !newPassword){
+    message.textContent = "Token and new password are required.";
+    return;
+  }
+
+  try{
+    const response = await fetch("/api/reset-password",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        token:token,
+        newPassword:newPassword
+      })
+    });
+
+    const data = await response.json();
+
+    message.textContent =
+      data.message || "Password reset completed.";
+
+    if(data.success){
+      document.getElementById("resetArea").style.display="none";
+      document.getElementById("newForgotPassword").value="";
+    }
+  }catch(error){
+    message.textContent = "Server connection error.";
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- REGISTER-REFERRAL-HOOK -->
+<script>
+(function(){
+
+  const originalFetch = window.fetch;
+
+  window.fetch = function(input, init){
+
+    try{
+
+      const url =
+        typeof input === "string"
+          ? input
+          : (input && input.url) || "";
+
+      if(
+        url.includes("/api/register") &&
+        init &&
+        init.body
+      ){
+
+        const data = JSON.parse(init.body);
+
+        const referral =
+          document.getElementById(
+            "registrationReferralCode"
+          );
+
+        if(referral){
+          data.referralCode =
+            referral.value.trim().toUpperCase();
+        }
+
+        init.body = JSON.stringify(data);
+      }
+
+    }catch(error){
+      console.log("Referral hook:", error);
+    }
+
+    return originalFetch.apply(this, arguments);
+  };
+
+})();
+</script>
+<!-- END REGISTER-REFERRAL-HOOK -->
+
+
+<!-- REFERRAL-LINK-AUTOFILL -->
+<script>
+(function () {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+
+    if (!ref) return;
+
+    const timer = setInterval(function () {
+      const input =
+        document.querySelector('input[name="referralCode"]') ||
+        document.querySelector('#referralCode') ||
+        document.querySelector('input[placeholder*="Referral" i]');
+
+      if (input) {
+        input.value = ref.toUpperCase();
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+        clearInterval(timer);
+      }
+    }, 100);
+
+    setTimeout(function () {
+      clearInterval(timer);
+    }, 10000);
+  } catch (e) {
+    console.log("Referral link error");
+  }
+})();
+</script>
+
+</body>
+</html>

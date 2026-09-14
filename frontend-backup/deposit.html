@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:35px 20px;
+  border-radius:0 0 30px 30px;
+}
+
+.header h1{
+  margin:0 0 8px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:16px;
+  border-radius:15px;
+  margin-bottom:18px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  margin:15px 0;
+  border-radius:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.07);
+}
+
+.balance{
+  font-size:28px;
+  font-weight:bold;
+  color:#2563eb;
+  margin-top:8px;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+input{
+  width:100%;
+  padding:15px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  font-size:17px;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+  margin-top:12px;
+}
+
+button:disabled{
+  opacity:.6;
+}
+
+.message{
+  text-align:center;
+  padding:15px;
+  border-radius:12px;
+  margin-top:12px;
+}
+
+.success{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.history-item{
+  padding:15px 0;
+  border-bottom:1px solid #e2e8f0;
+}
+
+.history-item:last-child{
+  border-bottom:0;
+}
+
+.status{
+  font-weight:bold;
+  margin-top:5px;
+}
+</style>
+<script src="/auth-check.js"></script>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>💰 Deposit</h1>
+  <p>Manage your demo deposit requests</p>
+</div>
+
+<div class="container">
+
+  <div class="demo">
+    ⚠️ <b>Demo Mode</b> — No real money is processed.
+  </div>
+
+  <div class="card">
+    <div>Current Demo Balance</div>
+    <div id="balance" class="balance">Rs. 0</div>
+  </div>
+
+  <div class="card">
+    <h2>💰 New Deposit Request</h2>
+
+    <label for="amount">Amount</label>
+
+    <input
+      id="amount"
+      type="number"
+      min="1"
+      placeholder="Enter amount"
+    >
+
+    <button id="submitBtn" onclick="submitDeposit()">
+      Submit Demo Deposit
+    </button>
+
+    <div id="message"></div>
+  </div>
+
+  <div class="card">
+    <h2>📜 Deposit History</h2>
+    <div id="history">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadWallet(){
+
+  try{
+
+    const response = await fetch("/api/wallet");
+    const data = await response.json();
+
+    if(data.success){
+
+      document.getElementById("balance").textContent =
+        "Rs. " +
+        Number(data.wallet.balance || 0).toLocaleString();
+    }
+
+  }catch(error){
+
+    console.log("Wallet error:",error);
+  }
+}
+
+
+async function loadHistory(){
+
+  const box = document.getElementById("history");
+
+  try{
+
+    const response = await fetch("/api/deposits");
+    const data = await response.json();
+
+    if(!data.success){
+
+      box.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Please login first") +
+        '</div>';
+
+      return;
+    }
+
+    const deposits = data.deposits || [];
+
+    if(deposits.length === 0){
+
+      box.innerHTML =
+        '<div style="color:#64748b;text-align:center;padding:20px;">' +
+        'No deposit requests yet.' +
+        '</div>';
+
+      return;
+    }
+
+    box.innerHTML = deposits
+      .slice()
+      .reverse()
+      .map(deposit => {
+
+        let status = "⏳ Pending";
+        let color = "#d97706";
+
+        if(deposit.status === "approved"){
+          status = "✅ Approved";
+          color = "#16a34a";
+        }
+
+        if(deposit.status === "rejected"){
+          status = "❌ Rejected";
+          color = "#dc2626";
+        }
+
+        return `
+          <div class="history-item">
+
+            <b>Demo Deposit</b>
+
+            <div style="font-size:21px;font-weight:bold;margin-top:6px;">
+              Rs. ${Number(deposit.amount || 0).toLocaleString()}
+            </div>
+
+            <div class="status" style="color:${color}">
+              ${status}
+            </div>
+
+            <div style="color:#64748b;font-size:13px;margin-top:5px;">
+              ${new Date(deposit.createdAt).toLocaleString()}
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+  }catch(error){
+
+    box.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+}
+
+
+async function submitDeposit(){
+
+  const amountInput = document.getElementById("amount");
+  const button = document.getElementById("submitBtn");
+  const message = document.getElementById("message");
+
+  const amount = Number(amountInput.value);
+
+  message.innerHTML = "";
+
+  if(!amount || amount <= 0){
+
+    message.innerHTML =
+      '<div class="message error">Please enter a valid amount.</div>';
+
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Submitting...";
+
+  try{
+
+    const response = await fetch("/api/deposit",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        amount:amount
+      })
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+
+      message.innerHTML =
+        '<div class="message success">' +
+        '✅ Demo deposit request submitted successfully.' +
+        '</div>';
+
+      amountInput.value = "";
+
+      await loadWallet();
+      await loadHistory();
+
+    }else{
+
+      message.innerHTML =
+        '<div class="message error">' +
+        escapeHtml(data.message || "Deposit failed.") +
+        '</div>';
+    }
+
+  }catch(error){
+
+    message.innerHTML =
+      '<div class="message error">Server connection error.</div>';
+  }
+
+  button.disabled = false;
+  button.textContent = "Submit Demo Deposit";
+}
+
+
+function escapeHtml(text){
+
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+loadWallet();
+loadHistory();
+
+</script>
+
+</body>
+</html>

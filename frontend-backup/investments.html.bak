@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Plans</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#172033;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+  padding:45px 20px;
+  border-radius:0 0 35px 35px;
+}
+
+.header h1{
+  margin:0 0 10px;
+  font-size:32px;
+}
+
+.header p{
+  margin:0;
+  font-size:18px;
+}
+
+.container{
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
+
+.demo{
+  background:#fff7ed;
+  color:#c2410c;
+  padding:20px;
+  border-radius:16px;
+  margin:20px 0;
+  font-size:17px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  margin:18px 0;
+  border-radius:22px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+.card h2{
+  margin-top:0;
+}
+
+.amount{
+  font-size:30px;
+  font-weight:bold;
+  color:#2563eb;
+  margin:15px 0;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+}
+
+.status{
+  color:#16a34a;
+  font-weight:bold;
+}
+
+.message{
+  text-align:center;
+  padding:30px 10px;
+  color:#64748b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>📊 Investment Plans</h1>
+  <p>Choose a demo investment plan</p>
+</div>
+
+<div class="container">
+
+  <div class="demo">
+    ⚠️ <b>Demo Mode</b> — No real money or real returns are involved.
+  </div>
+
+  <div id="plans">
+    <div class="message">Loading plans...</div>
+  </div>
+
+</div>
+
+<script>
+
+async function loadPlans(){
+
+  const container = document.getElementById("plans");
+
+  try{
+
+    const response = await fetch("/api/plans");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML =
+        '<div class="message">Unable to load plans.</div>';
+      return;
+    }
+
+    const activePlans = data.plans.filter(plan => plan.active);
+
+    if(activePlans.length === 0){
+      container.innerHTML =
+        '<div class="message">No active plans available.</div>';
+      return;
+    }
+
+    container.innerHTML = activePlans.map(plan => `
+      <div class="card">
+
+        <h2>${plan.name}</h2>
+
+        <div class="amount">
+          Rs. ${Number(plan.amount).toLocaleString()}
+        </div>
+
+        <p class="status">✓ Active</p>
+
+        <button onclick="selectPlan('${plan.id}')">
+          Select Plan
+        </button>
+
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML =
+      '<div class="message">Server connection error</div>';
+
+  }
+}
+
+
+function selectPlan(id){
+  alert("Select Plan button working");
+
+  fetch("/api/plans")
+    .then(response => response.json())
+    .then(data => {
+
+      const plan = data.plans.find(p => p.id === id);
+
+      if(!plan || !plan.active){
+        alert("This plan is not active.");
+        loadPlans();
+        return;
+      }
+
+      localStorage.setItem("selectedPlan", JSON.stringify({
+        id: plan.id,
+        name: plan.name,
+        amount: "Rs. " + Number(plan.amount).toLocaleString(),
+        selectedAt: new Date().toISOString()
+      }));
+
+      window.location.href = "/dashboard.html";
+
+    })
+    .catch(() => {
+      alert("Server connection error");
+    });
+}
+
+
+loadPlans();
+
+</script>
+
+</body>
+</html>

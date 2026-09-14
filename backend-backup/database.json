@@ -1,0 +1,266 @@
+{
+  "users": [
+    {
+      "id": "1789222547704",
+      "name": "Test User",
+      "email": "test123@example.com",
+      "passwordHash": "$2b$12$gauNUAMzNgTiyTCg01.toem9irHV3dqTcfn3DU9k9VLdRspfDj31a",
+      "role": "admin",
+      "createdAt": "2026-09-12T14:15:47.704Z"
+    },
+    {
+      "id": "1789223710544",
+      "name": "Khan",
+      "email": "pathan131khan@gmail.com",
+      "passwordHash": "$2b$12$1gPZ6ukLuYpiNPpRrTPWZOLgcxp/tQLyDuOBtQTAP6g7YLm6JzakG",
+      "role": "user",
+      "createdAt": "2026-09-12T14:35:10.544Z"
+    },
+    {
+      "id": "1789225038752",
+      "name": "Khan",
+      "email": "khan123@gmail.com",
+      "passwordHash": "$2b$12$PmxG8ywN9i5ZBtOs5p4Ts.hwOdxbzYlovQRVA2BW/qGolqWObKYxa",
+      "role": "user",
+      "createdAt": "2026-09-12T14:57:18.752Z"
+    },
+    {
+      "id": "1789225433280",
+      "name": "Anam",
+      "email": "anam543@gmail.com",
+      "passwordHash": "$2b$12$Hm2ONvokjdMc.ssYl0yDgOmxZRFoB8vDlnC2Eqe3PrZulQn/kjlsu",
+      "role": "admin",
+      "createdAt": "2026-09-12T15:03:53.280Z"
+    },
+    {
+      "id": "1789225494582",
+      "name": "Khan",
+      "email": "khan1332@gmail.com",
+      "passwordHash": "$2b$12$nlYAzNp/WZr45DSH.u7CSOfaNuhv5SejnCvrFU81Ktm7cUX4zwjIi",
+      "role": "user",
+      "createdAt": "2026-09-12T15:04:54.582Z"
+    },
+    {
+      "id": "1789236518762",
+      "name": "Khan",
+      "email": "khan3332@gmail.com",
+      "passwordHash": "$2b$12$ChH5e/UHJw8pvv5p1MEuiuqbSmbo6e3Q48B3Y.05/Mk3kbPNZ7G0m",
+      "role": "admin",
+      "createdAt": "2026-09-12T18:08:38.762Z"
+    },
+    {
+      "id": "1789327252544",
+      "name": "Imran khan",
+      "email": "imrankhan12@gmail.com",
+      "passwordHash": "$2b$12$Sx0g5QRJIuvPtwPgA.BrEOVISLq/Pwmbo3HFXsUo29.z2vrZocUce",
+      "role": "user",
+      "createdAt": "2026-09-13T19:20:52.544Z"
+    }
+  ],
+  "deposits": [
+    {
+      "id": "1789248796481",
+      "userId": "1789236518762",
+      "amount": 1000,
+      "status": "rejected",
+      "createdAt": "2026-09-12T21:33:16.481Z",
+      "updatedAt": "2026-09-13T10:03:02.684Z"
+    },
+    {
+      "id": "1789248796897",
+      "userId": "1789236518762",
+      "amount": 1000,
+      "status": "rejected",
+      "createdAt": "2026-09-12T21:33:16.898Z",
+      "updatedAt": "2026-09-13T10:03:02.676Z"
+    },
+    {
+      "id": "1789294028816",
+      "userId": "1789236518762",
+      "amount": 1000,
+      "status": "approved",
+      "createdAt": "2026-09-13T10:07:08.816Z",
+      "updatedAt": "2026-09-13T10:26:06.549Z"
+    },
+    {
+      "id": "1789294028827",
+      "userId": "1789236518762",
+      "amount": 1000,
+      "status": "approved",
+      "createdAt": "2026-09-13T10:07:08.827Z",
+      "updatedAt": "2026-09-13T10:10:13.772Z"
+    },
+    {
+      "id": "1789304758890",
+      "userId": "1789236518762",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-09-13T13:05:58.890Z"
+    },
+    {
+      "id": "1789304765986",
+      "userId": "1789236518762",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-09-13T13:06:05.986Z"
+    },
+    {
+      "id": "1789304827147",
+      "userId": "1789236518762",
+      "amount": 100,
+      "status": "pending",
+      "createdAt": "2026-09-13T13:07:07.147Z"
+    },
+    {
+      "id": "1789308364425",
+      "userId": "1789236518762",
+      "amount": 100,
+      "status": "approved",
+      "createdAt": "2026-09-13T14:06:04.425Z",
+      "updatedAt": "2026-09-13T14:13:29.871Z"
+    }
+  ],
+  "plans": [
+    {
+      "id": "starter",
+      "name": "Starter Plan",
+      "amount": 100,
+      "active": true
+    },
+    {
+      "id": "basic",
+      "name": "Basic Plan",
+      "amount": 500,
+      "active": true
+    },
+    {
+      "id": "standard",
+      "name": "Standard Plan",
+      "amount": 1000,
+      "active": true
+    },
+    {
+      "id": "plus",
+      "name": "Plus Plan",
+      "amount": 2500,
+      "active": true
+    },
+    {
+      "id": "premium",
+      "name": "Premium Plan",
+      "amount": 5000,
+      "active": true
+    }
+  ],
+  "investments": [
+    {
+      "id": "1789312871777",
+      "userId": "1789236518762",
+      "planId": "starter",
+      "planName": "Starter Plan",
+      "amount": 100,
+      "status": "active",
+      "createdAt": "2026-09-13T15:21:11.777Z"
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": "1789323677619",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T18:21:17.619Z"
+    },
+    {
+      "id": "1789324387853",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T18:33:07.853Z"
+    },
+    {
+      "id": "1789324894409",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T18:41:34.409Z"
+    },
+    {
+      "id": "1789325544301",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T18:52:24.301Z"
+    },
+    {
+      "id": "1789325745789",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T18:55:45.789Z"
+    },
+    {
+      "id": "1789327252547",
+      "userId": "1789327252544",
+      "action": "REGISTER",
+      "details": "New account registered",
+      "createdAt": "2026-09-13T19:20:52.547Z"
+    },
+    {
+      "id": "1789327269287",
+      "userId": "1789327252544",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "createdAt": "2026-09-13T19:21:09.287Z"
+    },
+    {
+      "id": "1789327276039",
+      "userId": "1789327252544",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T19:21:16.039Z"
+    },
+    {
+      "id": "1789327639850",
+      "userId": "1789327252544",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "createdAt": "2026-09-13T19:27:19.850Z"
+    },
+    {
+      "id": "1789327655554",
+      "userId": "1789327252544",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T19:27:35.554Z"
+    },
+    {
+      "id": "1789329870191",
+      "userId": "1789327252544",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T20:04:30.191Z"
+    },
+    {
+      "id": "1789329940546",
+      "userId": "1789327252544",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "createdAt": "2026-09-13T20:05:40.546Z"
+    },
+    {
+      "id": "1789329947755",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T20:05:47.755Z"
+    },
+    {
+      "id": "1789330008804",
+      "userId": "1789236518762",
+      "action": "LOGIN",
+      "details": "User logged in",
+      "createdAt": "2026-09-13T20:06:48.804Z"
+    }
+  ]
+}

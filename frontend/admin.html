@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investora — Invest • Grow • Earn</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f6fb;
+}
+.header{
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  color:white;
+  padding:28px 20px;
+}
+.header h1{margin:0;font-size:28px}
+.container{max-width:600px;margin:25px auto;padding:0 18px}
+.card{
+  background:white;
+  padding:20px;
+  margin-bottom:15px;
+  border-radius:16px;
+  box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+.amount{
+  font-size:22px;
+  font-weight:bold;
+  color:#2563eb;
+}
+.status{
+  font-weight:bold;
+}
+button{
+  border:0;
+  padding:12px 16px;
+  border-radius:9px;
+  color:white;
+  font-weight:bold;
+  margin:5px 5px 0 0;
+}
+.approve{background:#16a34a}
+.reject{background:#dc2626}
+</style>
+
+<style id="horizontal-layout">
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  overflow-x:hidden;
+}
+
+#userNavigation{
+  display:flex !important;
+  flex-wrap:nowrap !important;
+  overflow-x:auto !important;
+  gap:10px !important;
+  padding:10px !important;
+  -webkit-overflow-scrolling:touch;
+}
+
+#userNavigation a{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+.card{
+  flex:0 0 300px !important;
+}
+
+section{
+  max-width:100%;
+}
+
+@media(max-width:700px){
+  .card,
+  .dashboard-card,
+  .plan-card,
+  .stat-card{
+    flex:0 0 85vw;
+    max-width:85vw;
+  }
+
+  .cards,
+  .card-container,
+  .card-grid,
+  .plans,
+  .plans-container{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    overflow-x:auto !important;
+    gap:14px !important;
+    padding:8px 4px 16px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cards > *,
+  .card-container > *,
+  .card-grid > *,
+  .plans > *,
+  .plans-container > *{
+    flex:0 0 85vw !important;
+  }
+}
+</style>
+
+
+<style id="ADMIN-PRO-DESIGN">
+
+/* ===== ADMIN PROFESSIONAL DESIGN ===== */
+
+body{
+  margin:0!important;
+  background:#f3f6fb!important;
+  color:#172033;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.container{
+  width:100%!important;
+  max-width:1100px!important;
+  margin:auto!important;
+  padding:18px 12px 45px!important;
+}
+
+/* Cards */
+.card{
+  background:#fff!important;
+  border:1px solid #e4e9f1!important;
+  border-radius:18px!important;
+  padding:18px!important;
+  margin-bottom:16px!important;
+  box-shadow:0 7px 22px rgba(30,50,80,.08)!important;
+}
+
+/* Headings */
+h1{
+  font-size:28px!important;
+  color:#172033!important;
+}
+
+h2{
+  font-size:22px!important;
+  color:#172033!important;
+}
+
+h3{
+  font-size:18px!important;
+}
+
+/* Inputs */
+input,
+select,
+textarea{
+  width:100%!important;
+  min-height:46px!important;
+  padding:11px 13px!important;
+  border:1px solid #dce3ed!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  font-size:14px!important;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none!important;
+  border-color:#2867df!important;
+  box-shadow:0 0 0 3px rgba(40,103,223,.10)!important;
+}
+
+/* Buttons */
+button{
+  border:0!important;
+  border-radius:10px!important;
+  min-height:42px!important;
+  padding:9px 14px!important;
+  font-weight:700!important;
+  cursor:pointer!important;
+}
+
+/* Tables */
+table{
+  width:100%!important;
+  border-collapse:collapse!important;
+  background:#fff!important;
+}
+
+th{
+  background:#0d47a1!important;
+  color:#fff!important;
+  padding:12px!important;
+  text-align:left!important;
+  font-size:13px!important;
+}
+
+td{
+  padding:11px!important;
+  border-bottom:1px solid #edf0f5!important;
+  font-size:13px!important;
+}
+
+/* Status */
+.status{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+}
+
+/* Sections */
+#users,
+#deposits,
+#plans,
+#activity,
+#adminInvestments{
+  width:100%!important;
+}
+
+/* Activity horizontal scroll on small screens */
+#activity{
+  overflow-x:auto!important;
+}
+
+/* Mobile */
+@media(max-width:700px){
+
+  .container{
+    padding:13px 9px 35px!important;
+  }
+
+  .card{
+    padding:15px!important;
+    border-radius:16px!important;
+  }
+
+  h1{
+    font-size:24px!important;
+  }
+
+  h2{
+    font-size:20px!important;
+  }
+
+  table{
+    min-width:650px!important;
+  }
+
+  #activity{
+    overflow-x:auto!important;
+  }
+
+  button{
+    font-size:13px!important;
+  }
+}
+
+/* Desktop */
+@media(min-width:800px){
+
+  .container{
+    padding:25px 20px 55px!important;
+  }
+
+  .card{
+    padding:22px!important;
+  }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="adminNav" style="
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:white;
+  padding:10px;
+  margin:0 0 15px 0;
+  border-radius:0 0 16px 16px;
+  box-shadow:0 3px 12px rgba(0,0,0,.10);
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  white-space:nowrap;
+">
+  <button onclick="adminGo('top')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">🏠 Top</button>
+  <button onclick="adminGo('users')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">👥 Users</button>
+  <button onclick="adminGo('deposits')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">💰 Deposits</button>
+  <button onclick="adminGo('plans')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">📊 Plans</button>
+  <button onclick="adminGo('investments')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">📈 Investments</button>
+  <button onclick="adminGo('activity')" style="padding:9px 12px;border:0;border-radius:9px;background:#2563eb;color:white;font-weight:bold;">📝 Activity</button>
+</div>
+
+<script>
+function findHeading(text) {
+  const headings = document.querySelectorAll("h2");
+  for (const h of headings) {
+    if ((h.textContent || "").toLowerCase().includes(text.toLowerCase())) {
+      return h;
+    }
+  }
+  return null;
+}
+
+function adminGo(section) {
+  let target = null;
+
+  if (section === "top") {
+    window.scrollTo({top:0, behavior:"smooth"});
+    return;
+  }
+
+  if (section === "users") {
+    target = findHeading("Users Management");
+  }
+
+  if (section === "deposits") {
+    target = findHeading("Deposit");
+  }
+
+  if (section === "plans") {
+    target = findHeading("Investment Plans Management");
+  }
+
+  if (section === "investments") {
+    target = findHeading("Demo Investment Management");
+  }
+
+  if (section === "activity") {
+    target = findHeading("Activity Log");
+  }
+
+  if (target) {
+    target.scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+  }
+}
+</script>
+
+
+<div id="adminStats" style="
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin:20px 0;
+">
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">👥 Total Users</div>
+    <div id="statUsers" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">💰 Pending Deposits</div>
+    <div id="statPending" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">✅ Approved Deposits</div>
+    <div id="statApproved" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);">
+    <div style="font-size:14px;color:#64748b;">📊 Active Investments</div>
+    <div id="statInvestments" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+
+  <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 4px 15px rgba(0,0,0,.06);grid-column:1/-1;">
+    <div style="font-size:14px;color:#64748b;">📝 Recent Activities</div>
+    <div id="statActivity" style="font-size:28px;font-weight:bold;margin-top:6px;">...</div>
+  </div>
+</div>
+
+<script>
+async function loadAdminStats() {
+  try {
+    const [usersRes, depositsRes, activityRes] = await Promise.all([
+      fetch("/api/admin/users"),
+      fetch("/api/admin/deposits"),
+      fetch("/api/admin/activity")
+    ]);
+
+    const usersData = await usersRes.json();
+    const depositsData = await depositsRes.json();
+    const activityData = await activityRes.json();
+
+    const users = usersData.users || [];
+    const deposits = depositsData.deposits || [];
+    const logs = activityData.logs || [];
+
+    const pending = deposits.filter(
+      d => d.status === "pending"
+    ).length;
+
+    const approved = deposits.filter(
+      d => d.status === "approved"
+    ).length;
+
+    document.getElementById("statUsers").textContent =
+      users.length;
+
+    document.getElementById("statPending").textContent =
+      pending;
+
+    document.getElementById("statApproved").textContent =
+      approved;
+
+    document.getElementById("statActivity").textContent =
+      logs.length;
+
+    try {
+      const response = await fetch("/api/admin/investments");
+      const data = await response.json();
+
+      document.getElementById("statInvestments").textContent =
+        data.investments
+          ? data.investments.filter(i => i.status === "active").length
+          : "0";
+    } catch {
+      document.getElementById("statInvestments").textContent = "0";
+    }
+
+  } catch (error) {
+    console.log("Admin stats error:", error);
+  }
+}
+
+loadAdminStats();
+
+setInterval(loadAdminStats, 30000);
+</script>
+
+
+<div class="header">
+  <h1>🛡️ Admin Dashboard</h1>
+  <p>Demo Deposit Management</p>
+</div>
+
+<div class="container">
+  <h2>💳 Deposit Requests</h2>
+  <div id="message">Loading...</div>
+  <div id="deposits"></div>
+</div>
+
+<div class="card">
+  <h2>👥 Users Management</h2>
+  <div id="users">Loading users...</div>
+</div>
+<div class="card">
+  <h2>📊 Investment Plans Management</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Demo plans — real money/returns are not active.
+  </p>
+  <div id="plans">Loading plans...</div>
+</div>
+
+<script>
+
+async function loadDeposits(){
+
+  const message = document.getElementById("message");
+  const container = document.getElementById("deposits");
+
+  try{
+
+    const response = await fetch("/api/admin/deposits");
+    const data = await response.json();
+
+    if(!data.success){
+      message.innerHTML = data.message;
+      return;
+    }
+
+    message.innerHTML = "";
+
+    if(data.deposits.length === 0){
+      container.innerHTML = "<div class='card'>No deposits yet.</div>";
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.deposits.slice().reverse().forEach(deposit => {
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="amount">
+          Rs. ${Number(deposit.amount).toLocaleString()}
+        </div>
+
+        <p>
+          Status:
+          <span class="status">${deposit.status}</span>
+        </p>
+
+        <p>User ID: ${deposit.userId}</p>
+        <p>Deposit ID: ${deposit.id}</p>
+
+        <button class="approve"
+          onclick="changeStatus('${deposit.id}','approved')">
+          ✓ Approve
+        </button>
+
+        <button class="reject"
+          onclick="changeStatus('${deposit.id}','rejected')">
+          ✕ Reject
+        </button>
+      `;
+
+      container.appendChild(card);
+    });
+
+  }catch(error){
+
+    message.innerHTML = "Server connection error";
+
+  }
+}
+
+
+async function changeStatus(id,status){
+
+  try{
+
+    const response = await fetch(
+      "/api/admin/deposits/" + id + "/status",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({status:status})
+      }
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Demo deposit status: " + status);
+      loadDeposits();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+loadDeposits();
+
+
+async function loadUsers(){
+
+  const container = document.getElementById("users");
+
+  try{
+
+    const response = await fetch("/api/admin/users");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    if(data.users.length === 0){
+      container.innerHTML = "<p>No users found.</p>";
+      return;
+    }
+
+    container.innerHTML = data.users.map(user => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong>${user.name}</strong>
+        <p style="margin:6px 0;">${user.email}</p>
+        <small>Role: <b>${user.role}</b></small>
+        <br><br>
+        <button onclick="changeRole('${user.id}','${user.role === "admin" ? "user" : "admin"}')"
+          style="background:#2563eb;color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+          Change to ${user.role === "admin" ? "User" : "Admin"}
+        </button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadUsers();
+
+
+async function changeRole(id, role){
+
+  try{
+
+    const response = await fetch("/api/admin/users/" + id + "/role", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({role:role})
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      alert("Role changed to " + role);
+      loadUsers();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+
+async function loadPlans(){
+
+  const container = document.getElementById("plans");
+
+  try{
+
+    const response = await fetch("/api/admin/plans");
+    const data = await response.json();
+
+    if(!data.success){
+      container.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    container.innerHTML = data.plans.map(plan => `
+      <div style="padding:15px 0;border-bottom:1px solid #eee;">
+        <strong style="font-size:18px;">${plan.name}</strong>
+        <p style="margin:7px 0;color:#2563eb;font-weight:bold;">
+          Rs. ${Number(plan.amount).toLocaleString()}
+        </p>
+        <small>Status: <b>${plan.active ? "Active" : "Inactive"}</b></small>
+<br><br>
+<button onclick="togglePlan('${plan.id}')"
+style="background:${plan.active ? "#dc2626" : "#16a34a"};color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:bold;">
+${plan.active ? "Deactivate" : "Activate"}
+</button>
+      </div>
+    `).join("");
+
+  }catch(error){
+
+    container.innerHTML = "<p>Server connection error</p>";
+
+  }
+}
+
+loadPlans();
+
+
+async function togglePlan(id){
+
+  try{
+
+    const response = await fetch("/api/admin/plans/" + id + "/status", {
+      method:"POST"
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      loadPlans();
+    }else{
+      alert(data.message);
+    }
+
+  }catch(error){
+
+    alert("Server connection error");
+
+  }
+}
+
+</script>
+
+
+<div class="card">
+  <h2>📝 Activity Log</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Recent user and admin activities
+  </p>
+  
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:15px 0;">
+  <input
+    id="activitySearch"
+    type="text"
+    placeholder="🔎 Search user or email..."
+    oninput="filterActivity()"
+    style="flex:1;min-width:180px;padding:12px;border:1px solid #cbd5e1;border-radius:10px;"
+  >
+
+  <select
+    id="activityFilter"
+    onchange="filterActivity()"
+    style="padding:12px;border:1px solid #cbd5e1;border-radius:10px;"
+  >
+    <option value="ALL">All Activities</option>
+    <option value="LOGIN">Login</option>
+    <option value="LOGOUT">Logout</option>
+    <option value="DEPOSIT">Deposits</option>
+    <option value="INVESTMENT">Investments</option>
+    <option value="ROLE">Role Changes</option>
+    <option value="PLAN">Plan Changes</option>
+  </select>
+
+  <button
+    onclick="loadActivity()"
+    style="padding:12px 18px;border:0;border-radius:10px;background:#2563eb;color:white;font-weight:bold;"
+  >
+    🔄 Refresh
+  </button>
+</div>
+<div id="activity">
+    Loading activity...
+  </div>
+</div>
+
+<script>
+async function loadActivity() {
+  const box = document.getElementById("activity");
+
+  try {
+    const response = await fetch("/api/admin/activity");
+    const data = await response.json();
+
+    if (!data.success) {
+      box.innerHTML = "<p>" + data.message + "</p>";
+      return;
+    }
+
+    if (!data.logs || data.logs.length === 0) {
+      box.innerHTML = "<p>No activity yet.</p>";
+      return;
+    }
+
+    window.activityLogs = data.logs || [];
+    filterActivity();
+  }
+
+  function filterActivity() {
+    const box = document.getElementById("activity");
+    const search = (document.getElementById("activitySearch")?.value || "").toLowerCase();
+    const filter = document.getElementById("activityFilter")?.value || "ALL";
+
+    const logs = (window.activityLogs || []).filter(log => {
+      const text = (
+        (log.userName || "") + " " +
+        (log.userEmail || "") + " " +
+        (log.action || "") + " " +
+        (log.details || "")
+      ).toLowerCase();
+
+      const matchesSearch = !search || text.includes(search);
+
+      let matchesFilter = true;
+
+      if (filter !== "ALL") {
+        matchesFilter = (log.action || "").includes(filter);
+      }
+
+      return matchesSearch && matchesFilter;
+    });
+
+    if (logs.length === 0) {
+      box.innerHTML = "<p>No matching activity found.</p>";
+      return;
+    }
+
+    box.innerHTML = logs.map(log => `
+      <div style="
+        background:#f8fafc;
+        padding:15px;
+        margin:10px 0;
+        border-radius:12px;
+        border-left:4px solid #2563eb;
+      ">
+        <b>👤 ${escapeHtml(log.userName || "Unknown User")}</b>
+        <div style="color:#64748b;font-size:13px;margin-top:3px;">
+          ${escapeHtml(log.userEmail || "")}
+        </div>
+        <div style="margin-top:8px;">
+          <b>${escapeHtml(log.action)}</b>
+        </div>
+        <div style="color:#475569;margin-top:5px;">
+          ${escapeHtml(log.details || "")}
+        </div>
+        <small style="color:#64748b;">
+          ${new Date(log.createdAt).toLocaleString()}
+        </small>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    box.innerHTML = "<p>Server connection error</p>";
+  }
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+loadActivity();
+</script>
+
+
+<div class="card">
+  <h2>📊 Demo Investment Management</h2>
+  <p style="color:#64748b;font-size:14px;">
+    Demo investments only — no real money or real returns.
+  </p>
+
+  <div id="adminInvestments">
+    Loading investments...
+  </div>
+</div>
+
+<script>
+async function loadAdminInvestments() {
+  const box = document.getElementById("adminInvestments");
+
+  try {
+    const response = await fetch("/api/admin/investments");
+    const data = await response.json();
+
+    if (!data.success) {
+      box.innerHTML = "<p>" + escapeHtml(data.message) + "</p>";
+      return;
+    }
+
+    const investments = data.investments || [];
+
+    if (investments.length === 0) {
+      box.innerHTML = "<p>No demo investments yet.</p>";
+      return;
+    }
+
+    box.innerHTML = investments.map(inv => `
+      <div style="
+        background:#f8fafc;
+        padding:16px;
+        margin:12px 0;
+        border-radius:14px;
+        border-left:4px solid #2563eb;
+      ">
+        <b>👤 ${escapeHtml(inv.userName || "Unknown User")}</b>
+
+        <div style="color:#64748b;font-size:13px;margin-top:4px;">
+          ${escapeHtml(inv.userEmail || "")}
+        </div>
+
+        <div style="margin-top:10px;">
+          📊 <b>${escapeHtml(inv.planName || "Unknown Plan")}</b>
+        </div>
+
+        <div style="margin-top:5px;">
+          💰 Rs. ${Number(inv.amount || 0).toLocaleString()}
+        </div>
+
+        <div style="
+          margin-top:8px;
+          font-weight:bold;
+          color:${inv.status === "active" ? "#16a34a" : "#dc2626"};
+        ">
+          ${inv.status === "active" ? "🟢 Active" : "🔴 " + escapeHtml(inv.status || "Inactive")}
+        </div>
+
+        <small style="display:block;color:#64748b;margin-top:8px;">
+          🕐 ${new Date(inv.createdAt).toLocaleString()}
+        </small>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    console.log("Investment management error:", error);
+    box.innerHTML = "<p>Server connection error</p>";
+  }
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+loadAdminInvestments();
+</script>
+
+
+<!-- ADMIN-REFERRAL-MANAGEMENT -->
+<style>
+.admin-referral-card{
+  background:#fff;
+  border-radius:20px;
+  padding:20px;
+  margin-top:20px;
+  box-shadow:0 8px 25px rgba(20,40,80,.08);
+  border:1px solid #e7ecf3;
+}
+
+.admin-referral-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.admin-referral-count{
+  font-size:28px;
+  font-weight:800;
+}
+
+.admin-referral-search{
+  width:100%;
+  box-sizing:border-box;
+  margin:15px 0;
+  padding:12px;
+  border:1px solid #d5dce8;
+  border-radius:10px;
+  font-size:14px;
+}
+
+.admin-referral-table-wrap{
+  overflow-x:auto;
+}
+
+.admin-referral-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+}
+
+.admin-referral-table th,
+.admin-referral-table td{
+  padding:11px;
+  border-bottom:1px solid #edf0f5;
+  text-align:left;
+  font-size:13px;
+}
+
+.admin-referral-table th{
+  background:#f6f8fb;
+  font-weight:800;
+}
+
+.admin-referral-code{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:7px;
+  background:#eef4ff;
+  color:#2457c5;
+  font-weight:700;
+}
+
+.admin-referral-empty{
+  padding:20px;
+  text-align:center;
+  color:#667085;
+}
+</style>
+
+<section id="adminReferralManagement" class="admin-referral-card">
+
+  <div class="admin-referral-top">
+    <div>
+      <h2 style="margin:0;">🎁 Referral Management</h2>
+      <div style="color:#667085;margin-top:4px;">
+        Demo referral records
+      </div>
+    </div>
+
+    <div>
+      <div class="admin-referral-count"
+           id="adminReferralCount">0</div>
+      <div style="color:#667085;font-size:13px;">
+        Total Referrals
+      </div>
+    </div>
+  </div>
+
+  <input
+    id="adminReferralSearch"
+    class="admin-referral-search"
+    type="text"
+    placeholder="🔎 Search user, email or referral code..."
+    oninput="filterAdminReferrals()"
+  >
+
+  <div class="admin-referral-table-wrap">
+
+    <table class="admin-referral-table">
+
+      <thead>
+        <tr>
+          <th>New User</th>
+          <th>Email</th>
+          <th>Referrer</th>
+          <th>Referral Code</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody id="adminReferralTableBody">
+        <tr>
+          <td colspan="5" class="admin-referral-empty">
+            Loading referrals...
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+<script>
+
+let adminReferralData = [];
+
+async function loadAdminReferrals(){
+
+  const body =
+    document.getElementById("adminReferralTableBody");
+
+  try{
+
+    const response =
+      await fetch("/api/admin/referrals");
+
+    const data =
+      await response.json();
+
+    if(!data.success){
+
+      body.innerHTML =
+        '<tr><td colspan="5" class="admin-referral-empty">' +
+        escapeAdminReferral(data.message || "Unable to load") +
+        '</td></tr>';
+
+      return;
+    }
+
+    adminReferralData =
+      data.referrals || [];
+
+    document.getElementById(
+      "adminReferralCount"
+    ).textContent =
+      data.totalReferrals || 0;
+
+    renderAdminReferrals(adminReferralData);
+
+  }catch(error){
+
+    console.error(error);
+
+    body.innerHTML =
+      '<tr><td colspan="5" class="admin-referral-empty">' +
+      'Server connection error' +
+      '</td></tr>';
+  }
+}
+
+function renderAdminReferrals(items){
+
+  const body =
+    document.getElementById(
+      "adminReferralTableBody"
+    );
+
+  if(!items.length){
+
+    body.innerHTML =
+      '<tr><td colspan="5" class="admin-referral-empty">' +
+      'No referrals found.' +
+      '</td></tr>';
+
+    return;
+  }
+
+  body.innerHTML = items.map(function(item){
+
+    const date = item.createdAt
+      ? new Date(item.createdAt).toLocaleString()
+      : "-";
+
+    return `
+      <tr>
+        <td>
+          <strong>${escapeAdminReferral(item.userName)}</strong>
+        </td>
+
+        <td>
+          ${escapeAdminReferral(item.userEmail)}
+        </td>
+
+        <td>
+          ${escapeAdminReferral(item.referrerName)}
+          <br>
+          <small style="color:#667085;">
+            ${escapeAdminReferral(item.referrerEmail)}
+          </small>
+        </td>
+
+        <td>
+          <span class="admin-referral-code">
+            ${escapeAdminReferral(item.referralCode)}
+          </span>
+        </td>
+
+        <td>
+          ${escapeAdminReferral(date)}
+        </td>
+      </tr>
+    `;
+
+  }).join("");
+}
+
+function filterAdminReferrals(){
+
+  const query =
+    document.getElementById(
+      "adminReferralSearch"
+    ).value
+    .trim()
+    .toLowerCase();
+
+  if(!query){
+
+    renderAdminReferrals(adminReferralData);
+    return;
+  }
+
+  const filtered =
+    adminReferralData.filter(function(item){
+
+      return (
+        String(item.userName || "")
+          .toLowerCase()
+          .includes(query) ||
+
+        String(item.userEmail || "")
+          .toLowerCase()
+          .includes(query) ||
+
+        String(item.referrerName || "")
+          .toLowerCase()
+          .includes(query) ||
+
+        String(item.referrerEmail || "")
+          .toLowerCase()
+          .includes(query) ||
+
+        String(item.referralCode || "")
+          .toLowerCase()
+          .includes(query)
+      );
+
+    });
+
+  renderAdminReferrals(filtered);
+}
+
+function escapeAdminReferral(value){
+
+  return String(value || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+loadAdminReferrals();
+
+</script>
+<!-- END ADMIN-REFERRAL-MANAGEMENT -->
+
+</body>
+</html>
