@@ -1,19 +1,33 @@
 {
-  "version": 2,
-  "builds": [
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "source": "/api/:path*",
+      "destination": "/api"
     },
     {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "source": "/",
+      "destination": "/frontend/index.html"
+    },
+    {
+      "source": "/dashboard.html",
+      "destination": "/frontend/dashboard.html"
+    },
+    {
+      "source": "/investments.html",
+      "destination": "/frontend/investments.html"
+    },
+    {
+      "source": "/deposit.html",
+      "destination": "/frontend/deposit.html"
+    },
+    {
+      "source": "/transactions.html",
+      "destination": "/frontend/transactions.html"
+    },
+    {
+      "source": "/admin.html",
+      "destination": "/frontend/admin.html"
     }
   ]
 }

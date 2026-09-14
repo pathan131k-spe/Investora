@@ -1059,7 +1059,7 @@ app.get("/api/admin/referrals", (req, res) => {
   });
 });
 
-if (require.main === module) app.listen(PORT, () => {
+if (require.main === module) if (require.main === module) {\napp.listen(PORT, () => {
   console.log("Website running on port 3000");
 });
 
