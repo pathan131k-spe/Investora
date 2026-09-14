@@ -173,7 +173,7 @@ app.post("/api/register", async (req, res) => {
 
 app.post("/api/login", async (req, res) => {
   try {
-    const { email, password } = req.body || {};
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -182,16 +182,16 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-    const { data: user, error: userError } = await supabase
+    const { data: user, error } = await supabase
       .from("users")
-      .select("*")
-      .eq("email", cleanEmail)
+      .select("id,name,email,password_hash,role,referral_code,referred_by,created_at")
+      .eq("email", normalizedEmail)
       .maybeSingle();
 
-    if (userError) {
-      console.error("LOGIN DB ERROR:", userError.message);
+    if (error) {
+      console.error("SUPABASE LOGIN ERROR:", error.message);
       return res.status(503).json({
         success: false,
         message: "Database temporarily unavailable"
@@ -205,12 +205,9 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    const passwordOk = await bcrypt.compare(
-      String(password),
-      user.password_hash
-    );
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
 
-    if (!passwordOk) {
+    if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password"
@@ -220,13 +217,21 @@ app.post("/api/login", async (req, res) => {
     req.session.userId = user.id;
     req.session.role = user.role || "user";
 
-    res.json({
+    try {
+      logActivity(user.id, "LOGIN", "User logged in");
+    } catch (logError) {
+      console.error("LOGIN ACTIVITY LOG ERROR:", logError.message);
+    }
+
+    return res.json({
       success: true,
       message: "Login successful"
     });
+
   } catch (error) {
     console.error("LOGIN ERROR:", error);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
       message: "Server error"
     });
