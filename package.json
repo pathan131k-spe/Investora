@@ -1,0 +1,11 @@
+{
+  "name": "investora-site",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "lowdb": "^7.0.1"
+  }
+}
