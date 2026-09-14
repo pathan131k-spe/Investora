@@ -419,7 +419,8 @@ app.post("/api/logout", (req, res) => {
 });
 
 app.use(express.static("../frontend"));
-app.post("/api/deposit", (req, res) => {
+app.post("/api/deposit", async (req, res) => {
+  await initDB();
   if (!req.session.userId) {
     return res.status(401).json({
       success: false,
@@ -464,7 +465,8 @@ app.post("/api/deposit", (req, res) => {
     message: "Deposit request submitted successfully"
   });
 });
-app.get("/api/deposits", (req, res) => {
+app.get("/api/deposits", async (req, res) => {
+  await initDB();
   if (!req.session.userId) {
     return res.status(401).json({
       success: false,
