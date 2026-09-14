@@ -19,6 +19,8 @@ const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
+const { loadDB, saveDB } = require("./db-supabase");
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,12 +31,12 @@ if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify({ users: [] }, null, 2));
 }
 
-function readDB() {
-  return JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+async function readDB() {
+  return await loadDB();
 }
 
-function writeDB(data) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+async function writeDB(data) {
+  await saveDB(data);
 }
 
 app.use(express.json());
@@ -180,9 +182,11 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    const db = readDB();
+    const db = readDB() || {};
 
-    const user = db.users.find(
+    const users = Array.isArray(db.users) ? db.users : [];
+
+    const user = users.find(
       user => user.email === email.toLowerCase()
     );
 
