@@ -45,6 +45,46 @@ async function writeDB(data) {
   }
 }
 
+// Reliable persistent deposit history
+app.get("/api/deposits", async (req, res) => {
+  try {
+    await initDB();
+
+    const db = getDB();
+    const currentUserId = req.session && req.session.userId;
+
+    if (!currentUserId) {
+      return res.status(401).json({
+        success: false,
+        message: "Login required"
+      });
+    }
+
+    const deposits = Array.isArray(db.deposits) ? db.deposits : [];
+
+    const mine = deposits.filter(d => {
+      const id =
+        d.userId ??
+        d.user_id ??
+        (d.user && d.user.id) ??
+        (d.user && d.userId);
+
+      return String(id) === String(currentUserId);
+    });
+
+    return res.json({
+      success: true,
+      deposits: mine
+    });
+  } catch (error) {
+    console.error("DEPOSITS GET ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to load deposits"
+    });
+  }
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -470,27 +510,7 @@ app.post("/api/deposit", async (req, res) => {
     message: "Deposit request submitted successfully"
   });
 });
-app.get("/api/deposits", async (req, res) => {
-  await initDB();
-  if (!req.session.userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Please login first"
-    });
-  }
 
-  const db = readDB();
-  const deposits = (db.deposits || []).filter(
-    deposit => deposit.userId === req.session.userId
-  );
-
-  res.json({
-    success: true,
-    deposits: deposits
-  });
-});
-
-// ADMIN DEMO API
 app.get("/api/admin/deposits", (req, res) => {
   const db = readDB();
 
