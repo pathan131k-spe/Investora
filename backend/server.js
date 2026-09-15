@@ -37,7 +37,12 @@ async function readDB() {
 }
 
 async function writeDB(data) {
-  await saveDB(data);
+  try {
+    return saveDB(data);
+  } catch (error) {
+    console.error("SAVE DB ERROR:", error.message);
+    return Promise.resolve();
+  }
 }
 
 app.use(express.json());
