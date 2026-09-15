@@ -457,7 +457,7 @@ app.post("/api/deposit", async (req, res) => {
   };
 
   db.deposits.push(deposit);
-  writeDB(db);
+  await saveDB(db);
 
   logActivity(
     req.session.userId,
